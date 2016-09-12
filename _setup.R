@@ -7,8 +7,8 @@ opts_chunk$set(
     message = FALSE,
     echo = TRUE,
     tidy = FALSE,
-    fig.width = 7,
-    fig.height = 5,
+    fig.width = 9,
+    fig.height = 6,
     fig.align = "center",
     fig.pos = "h",
     dev.args = list(family = "Palatino"))
@@ -19,6 +19,7 @@ library(lattice)
 library(latticeExtra)
 mycol <- c(1, "#377EB8", "#E41A1C", "#4DAF4A",
            "#ff00ff", "#FF7F00", "#984EA3", "#FFFF33")
+myreg <- colorRampPalette(c(mycol[1],  "gray30", mycol[2]))(100)
 
 ## Trellis graphical style.
 ps <- list(
@@ -33,7 +34,8 @@ ps <- list(
     superpose.line = list(col = mycol, lty = 1),
     superpose.symbol = list(col = mycol, pch = 1),
     superpose.polygon = list(col = mycol),
-    strip.background = list(col = c("gray90", "gray70")))
+    strip.background = list(col = c("gray90", "gray70")),
+    regions = list(col = myreg)
+    )
 
 trellis.par.set(ps)
-
