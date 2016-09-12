@@ -2,6 +2,7 @@
 **/*_cache/*
 **/*_files/*
 **/figure/*
+**/cache/*
 *.nav
 *.snm
 *.tex
@@ -16,3 +17,11 @@
 .#*
 
 *.Rhistory
+
+## Site files
+*.pdf
+*.html
+**/site_libs/*
+
+## Playground local
+**/playground/*
