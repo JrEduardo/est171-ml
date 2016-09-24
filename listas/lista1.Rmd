@@ -192,10 +192,12 @@ results <- lapply(models, function(modelo) {
     pred <- vector("numeric", length = n)
     for (i in 1:n) {
         ## obs <- as.data.frame(modelo$model[i, ])
-        obs <- modelo$model$y[i]
+        ## mod <- update(modelo, data = modelo$model[-i, ])
         ## pred[i] <- predict(mod, newdata = obs)
-        mod <- update(modelo, data = modelo$model[-i, ])
-        pred[i] <- cbind(1, modelo$model$X)[i, ] %*% coef(mod)
+        obs <- modelo$model$y[i]
+        mod <- with(modelo$model,
+                    .lm.fit(x = cbind(1, X[-i, ]), y = y[-i]))
+        pred[i] <- cbind(1, modelo$model$X)[i, ] %*% mod$coefficients
         eqs[i] <- (obs - pred[i])^2
     }
     list(eqs = eqs, pred = pred)
