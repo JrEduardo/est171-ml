@@ -8,6 +8,9 @@ output:
     keep_tex: true
     includes:
       in_header: ../_preambulo.tex
+  html_document:
+    toc: true
+    code_folding: show
 ---
 
 ```{r setup, include = FALSE}

@@ -31,7 +31,7 @@ img {
 /* TOC */
 #TOC {
     border-radius: 0px;
-    font-size: 0.9em;
+    font-size: 1em;
 }
 
 .list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
