@@ -25,8 +25,8 @@ resumo expandido e apresentado em formato de pôster, os arquivos
 referentes ao trabalho prático são armazenados no diretório
 [`practical/`]. A lista de materiais elaborados é exibida abaixo:
 
-* [Lista 1](https://jreduardo.github.io/est171-ml/trab1.html) - Machine
-  Learning em problemas de Regressão: aplicação de regressão sob
+* **Lista 1** ([PDF](./trab1.pdf) / [HTML](./trab1.html) com códigos) -
+  Machine Learning em problemas de Regressão: aplicação de regressão sob
   penalização Lasso e KNN.\
 
 Para sugestões, críticas ou relato de problemas abra uma _issue_ em
