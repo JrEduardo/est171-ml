@@ -1,0 +1,178 @@
+---
+title: Aprendizado de Máquina
+subtitle: UFMG EST171 - 2ª Lista de exercícios
+author: EERJ
+date: 04 de outubro de 2016
+output:
+  pdf_document:
+    keep_tex: true
+    includes:
+      in_header: ../_preambulo.tex
+  html_document:
+    toc: true
+    code_folding: show
+---
+
+```{r setup, include = FALSE}
+
+source("../_setup.R")
+opts_chunk$set(
+    cache = FALSE,
+    echo = FALSE,
+    fig.pos = "H")
+cols <- trellis.par.get("superpose.line")$col
+
+```
+
+```{r functions}
+
+## Para partição de uma base de dados em dados de treinamento,
+## validação, teste, etc.
+mysplit <- function(data, percent = NA, nfolds = NA,
+                    nobs = NA, seed = NULL) {
+    if (sum(is.na(c(percent, nfolds, nobs))) != 2) {
+        stop("Utilize um e apenas um dos argumentos")
+    }
+    n <- nrow(data)
+    if (!sum(is.na(percent))) {
+        if (sum(percent) != 1) {
+            stop("Os percentuais em cada dobra devem somar 1!")
+        }
+        p <- percent
+        folds <- n * p
+    }
+    if (!is.na(nfolds)) {
+        if (nfolds > n) {
+            stop(paste0("O número de dobras não deve exceder o ",
+                       "tamanho da amostra (n=", n, ")!"))
+        }
+        p <- rep(1/nfolds, nfolds)
+        folds <- n * p
+    }
+    if (!sum(is.na(nobs))) {
+        if (sum(nobs) != n) {
+            stop(paste0("O número de observações em cada dobra deve ",
+                       "somar ", n, "!"))
+        }
+        folds <- nobs
+    }
+    if (!is.null(seed)) {
+        set.seed(seed)
+    }
+    folds <- round(folds)
+    while (sum(folds) != n) {
+        g <- sample(1:length(folds), 1)
+        if (sum(folds) < n) {
+            folds[g] <- folds[g] + 1
+        } else {
+            folds[g] <- folds[g] - 1
+        }
+    }
+    out <- vector("list", length = length(folds))
+    for (i in 1:length(folds)) {
+        index <- sample(nrow(data), size = folds[i])
+        out[[i]] <- data[index, ]
+        data <- data[-index, ]
+    }
+    return(out)
+}
+
+```
+
+## Exercício 1 ##
+
+> _Baixe o conjunto de dados [`titanic.txt`](./data/titanic.txt). Cada
+  observação deste banco é relativa a um passageiro do Titanic. As
+  covariáveis indicam características deste passageiros; a variável
+  resposta indica se o passageiro sobreviveu ou não ao naufrágio.\
+  Seu objetivo é criar classificadores para predizer a variável resposta
+  com base nas covariáveis disponíveis. Para tanto, você deverá
+  implementar os seguintes classificadores, assim como estimar seus
+  riscos via conjunto de teste:_
+
+O conjunto de dados `Titanic` é apresentado na Tabela 1. As
+características dos passageiros disponíveis nesse conjunto são: classe
+econômica - **`Class`**, de quatro categorias; sexo -
+**`Sex`**, de duas categorias; e idade do passageiro - **`Age`**,
+categorizada em adultos ou crianças. Para todos os cruzamentos dessas
+covariáveis têm-se a frequência de sobreviventes e não sobreviventes -
+**`Survived`**.
+
+```{r tabdescritiva}
+
+dados <- read.table("./data/titanic.txt",
+                    header = TRUE,
+                    sep = "\t"
+                    )
+
+xt <- addmargins(table(dados), 4, FUN = list(list(Total = sum)))
+pander::pander(ftable(xt),
+               caption = paste("Tabela de frequência dos",
+                               "passageiros do Titanic"),
+               ## style = "rmarkdown",
+               ## justify = c(rep("left", 4),
+               ##             rep("center", 2)),
+               emphasize.strong.cells = rbind(
+                   cbind(1, c(4, 7)), cbind(2, 1:3))
+               )
+
+```
+
+A análise gráfica descritiva do conjunto de dados é realizada na
+\autoref{mosaicplot} onde exibe-se, acima, as frequências das categorias de cada
+variável presente no conjunto de dados e, abaixo, as proporções da
+tabela de contingência em cada combinação das variáveis dispostas em
+áreas retangulares. Primeiramente observa-se que a conjunto de dados não
+é balanceado em praticamente nenhuma variável, esse desbalanço é maais
+notável para a idade dos passageiros, onde observa-se que,
+aproximadamente, `paste0(round(prop.table(table(dados$Age))[1], 3)*100,
+"%")` são passageiros adultos. Já no gráfico abaixo, nota-se que
+praticamente todas as mulheres da primeira classe sobreviveram e que
+houveram menos passageiros sobreviventes do sexo
+masculino. Preliminarmente, pode-se imaginar que todas as covariáveis
+observadas, com exceção de **`Age`**, podem ser utéis para a
+classificar se um passageiro é sobrivente ou não, ou ainda, calcular sua
+probabilidade de sobrevida em uma possível tragédia como essa.
+
+```{r barchart, fig.height=3.5, fig.width=9}
+
+xys <- lapply(1:ncol(dados), function(i) {
+    da <- data.frame(table(dados[, i]), v = names(dados)[i])
+    xy <- barchart(Freq ~ Var1 | v,
+                   data = da,
+                   horizontal = FALSE,
+                   scales = list(
+                       y = list(draw = FALSE)
+                   ),
+                   origin = 0,
+                   ylab = NULL,
+                   panel = function(x, y, ...) {
+                       panel.barchart(x, y, ...)
+                       panel.text(x, y - mean(y) * 0.07, y)
+                   },
+                   par.settings = list(
+                       layout.widths = list(
+                           left.padding = 0,
+                           right.padding = 0
+                       )
+                   ))
+})
+
+## Gráficos de frequência
+gridExtra::marrangeGrob(xys, ncol = 4, nrow = 1, top = NA)
+
+```
+\vspace{-0.5cm}
+```{r mosaicplot, fig.height=3.5, fig.width=9, fig.cap="Gráficos descritivos da base de dados. Frequências observadas em cada variável de Titanic (superior) e Representação da tabela de contingência de forma hierárquica (inferior)."}
+
+## Gráficos de mosaico sequenciais
+## vcd::cotabplot(table(dados), layout = c(1, 4))
+vcd::doubledecker(table(dados), data = dados)
+
+```
+
+## Material suplementar ##
+
+Todos os códigos (para manipulação, ajustes e gráficos) exibidos neste
+trabalho estão disponíveis no endereço
+<https://jreduardo.github.io/est171-ml/>.
