@@ -22,6 +22,12 @@ opts_chunk$set(
     fig.pos = "H")
 cols <- trellis.par.get("superpose.line")$col
 
+## Pacotes
+library(e1071)
+library(MASS)
+library(FNN)
+library(Epi)
+
 ```
 
 ```{r functions}
@@ -77,6 +83,95 @@ mysplit <- function(data, percent = NA, nfolds = NA,
     return(out)
 }
 
+
+## Medidas resumo da matriz de confusão
+confmeds <- function(probs, teste, corte = 0.5) {
+    ##-------------------------------------------
+    ## Restrita para classificadores com duas categorias
+    ## A probabilidade em probs é da ultima categoria, ordenada por
+    ## ordem alfabética
+    ##-------------------------------------------
+    te <- as.integer(teste) - 1
+    cl <- ifelse(probs <= corte, 0, 1)
+    ##-------------------------------------------
+    pace <- sum(cl == te) / length(te)
+    espe <- sum(te[cl == te] == 0) / sum(te == 0)
+    sens <- sum(te[cl == te] == 1) / sum(te == 1)
+    pvp <- sum(cl[cl != te] == 0) / sum(cl == 0)
+    pvn <- sum(cl[cl != te] == 1) / sum(cl == 1)
+    ##-------------------------------------------
+    ## tab <- table(cl, teste); print(tab)
+    ## if (sum(dim(tab)) == 4) {
+    ##     senst <- tab[1, 1] / sum(tab[, 1])
+    ##     espet <- tab[2, 2] / sum(tab[, 2])
+    ##     pacet <- sum(diag(tab))/sum(tab)
+    ##     print(c(senst, espet, pacet))
+    ## }
+    out <- c("pace" = pace,
+             "sens" = sens,
+             "espe" = espe
+             ## "pvn" = pvn,
+             ## "pvp" = pvp
+             )
+    ## attr(out, "class") = "rocmeds"
+    return(out)
+}
+
+## Exibição gráfica da matrix de confusão
+confusionPlot <- function(cl, te) {
+    ##-------------------------------------------
+    lev <- unique(c(cl, te))
+    ## table(cl, te)
+    ma <- matrix(c(sum(te[cl == te] == lev[1]),
+                   sum(te[cl != te] == lev[1]),
+                   sum(te[cl != te] == lev[2]),
+                   sum(te[cl == te] == lev[2])),
+                 ncol = 2, byrow = FALSE)
+    ##-------------------------------------------
+    espe <- ma[1, 1] / sum(ma[, 1])
+    sens <- ma[2, 2] / sum(ma[, 2])
+    perr <- 1 - sum(diag(ma))/sum(ma)
+    texto <- paste(c("Classificações incorretas",
+                     "Especificidade",
+                     "Sensibilidade"),
+                   round(c(perr, espe, sens), 4))
+    key <- list(
+        space = "bottom",
+        lines = list(pch = rep(NA, 3), lty = rep(0, 3)),
+        text = list(texto))
+    ##-------------------------------------------
+    colr <- colorRampPalette(c("gray90", "gray70", "gray50"))
+    xy <- levelplot(
+        t(prop.table(ma)),
+        col.regions = colr,
+        at = seq(0, 1, length.out = 12),
+        ylim = c(2.5, 0.5),
+        aspect = "fill",
+        xlab.top = list("Classificação", cex = 1.2,
+                        font = "bold"),
+        ylab = list("Categoria\nreal", cex = 1.2,
+                    rot = 0, font = "bold"),
+        xlab = NULL,
+        key = key,
+        scales = list(
+            at = 1:2,
+            labels = lev,
+            tck = 0,
+            cex = 1.1,
+            x = list(alternating = 2)
+        ),
+        par.settings = list(
+            layout.heights = list(xlab.key.padding = 10)
+        ),
+        panel = function(x, y, z, ...) {
+            panel.levelplot(x = x, y = y, z = z, ...)
+            panel.text(x = x, y = y, col = 1,
+                       labels = format(round(z, 2), nsmall = 2))
+        })
+    print(xy)
+    invisible(xy)
+}
+
 ```
 
 ## Exercício 1 ##
@@ -102,14 +197,13 @@ covariáveis têm-se a frequência de sobreviventes e não sobreviventes -
 
 dados <- read.table("./data/titanic.txt",
                     header = TRUE,
-                    sep = "\t"
-                    )
+                    sep = "\t")
 
 xt <- addmargins(table(dados), 4, FUN = list(list(Total = sum)))
 pander::pander(ftable(xt),
                caption = paste("Tabela de frequência dos",
                                "passageiros do Titanic"),
-               ## style = "rmarkdown",
+               style = "rmarkdown",
                ## justify = c(rep("left", 4),
                ##             rep("center", 2)),
                emphasize.strong.cells = rbind(
@@ -119,9 +213,9 @@ pander::pander(ftable(xt),
 ```
 
 A análise gráfica descritiva do conjunto de dados é realizada na
-\autoref{mosaicplot} onde exibe-se, acima, as frequências das categorias de cada
-variável presente no conjunto de dados e, abaixo, as proporções da
-tabela de contingência em cada combinação das variáveis dispostas em
+\autoref{mosaicplot} onde exibe-se, acima, as frequências das categorias
+de cada variável presente no conjunto de dados e, abaixo, as proporções
+da tabela de contingência em cada combinação das variáveis dispostas em
 áreas retangulares. Primeiramente observa-se que a conjunto de dados não
 é balanceado em praticamente nenhuma variável, esse desbalanço é maais
 notável para a idade dos passageiros, onde observa-se que,
@@ -130,8 +224,8 @@ aproximadamente, `paste0(round(prop.table(table(dados$Age))[1], 3)*100,
 praticamente todas as mulheres da primeira classe sobreviveram e que
 houveram menos passageiros sobreviventes do sexo
 masculino. Preliminarmente, pode-se imaginar que todas as covariáveis
-observadas, com exceção de **`Age`**, podem ser utéis para a
-classificar se um passageiro é sobrivente ou não, ou ainda, calcular sua
+observadas, com exceção de **`Age`**, podem ser utéis para a classificar
+se um passageiro é sobrivente ou não, ou ainda, calcular sua
 probabilidade de sobrevida em uma possível tragédia como essa.
 
 ```{r barchart, fig.height=3.5, fig.width=9}
@@ -170,6 +264,512 @@ gridExtra::marrangeGrob(xys, ncol = 4, nrow = 1, top = NA)
 vcd::doubledecker(table(dados), data = dados)
 
 ```
+
+Para dar sequência a obtenção de classificadores, será realiza a
+partição da base de dados em dois conjuntos. Um para ajuste do
+classificador e outro para validação deste. A partição será realizada a
+partir da função implementada para tal finalidade, os detalhes da
+implementação dessa função são exibidos no
+[complemento online](https://jreduardo.github.io/est171-ml) do
+trabalho.
+
+```{r, echo=TRUE}
+
+## Particionando o conjunto de dados
+dasplit <- mysplit(dados, percent = c (0.7, 0.3), seed = 2016)
+
+## Número de observações em cada partição
+sapply(dasplit, nrow)
+
+## Atribuindo as partições em objetos de nome sujestivo
+da.train <- dasplit[[1]]
+da.teste <- dasplit[[2]]
+
+## Tranformando para inteiro, para utilização de alguns métodos
+X.train <- sapply(da.train, as.integer)
+X.teste <- sapply(da.teste, as.integer)
+
+```
+
+### Regressão Logística ###
+
+O primeiro classificador a ser construído, será fundamentado sob a
+teoria dos modelos lineares generalizados. Associadoremos à variável
+resposta (**`Survived`**), condicional ao vetor de covariáveis
+(**`Class`**, **`Sex`** e **`Age`**), a distribuição Binomial de
+parâmetro $\pi$, onde $\pi$ é função não linear (inversa da função
+logística) dos efeitos das covariáveis. A especificação do modelo é
+descrita abaixo.
+$$
+\begin{gathered}
+    \text{Survived}_i \mid \text{Class}_i,\, \text{Sex}_i, \text{Age}_i
+    \sim \text{Binomial}(\pi_i)\\
+    \log \left ( \frac{\pi_i}{1 - \pi_i} \right ) =
+    \beta_0 +
+    \beta_{11} X_{2st,i} + \beta_{12} X_{3st,i} + \beta_{13} X_{Crew,i} +
+    \beta_2 X_{Male,i} + \beta_3 X_{Child,i}
+\end{gathered}
+$$
+
+em que $i$ representa as características do i-ésimo indivíduo, $i=1, 2,
+\ldots, n$. $\underline{\beta}$ é o vetor dos parâmetros que representam
+os efeitos das covariáveis. E $X_{j, i}$ é uma variável binária que
+assume, para o i-ésimo indivíduo: 1 se a variável **`Class`** é igual a
+$j$ e 0 caso contrário, para $j=2St,\,3St\,\text{e }Crew$; 1 se a
+variável **`Sex`** é igual a $Male$ e 0 caso contrário, para $j=Male$; e
+1 se a variável **`Age`** é igual a $Child$ e 0 caso contrário, para
+$j=Child$.
+
+Ajustando esse modelo ao conjunto de treinamento, `da.train` têm-se os
+seguintes coeficientes estimados, com seu erro padrão calculado a partir
+da aproximação quadrática da versossimilhança e nível de significância
+do teste de Wald:
+
+```{r fitglm}
+
+m0glm <- glm(Survived ~ ., data = da.train, family = "binomial")
+
+tabglm <- summary(m0glm)$coefficients
+ind <- c(0, 11, 12, 12, 2, 3)
+rownames(tabglm) <- paste0("$\\beta_{", ind, "}$")
+colnames(tabglm) <- gsub("\\|", "\\\\|", colnames(tabglm))
+pander::pander(tabglm,
+               caption = paste("Coeficientes estimados e teste",
+                               "de Wald para o modelo Logístico"),
+               justify = c("left", rep("center", 4)),
+               style = "rmarkdown")
+
+##-------------------------------------------
+## Risco estimado
+pglm <- predict(m0glm, newdata = da.teste, type = "response")
+pred.glm50 <- ifelse(pglm >= 0.5, "Yes", "No")
+errglm50 <- sum(da.teste[, 4] != pred.glm50)/nrow(da.teste)
+
+```
+
+Note que o modelo logístico conforme descrito não é essencialmente um
+classificador, pois é um modelo para a probabilidade. Utilizando dessa
+probabilidade predita pelo modelo logística para classificação fez-se a
+classificação da forma $\hat{\pi_i} > 0.5$ classifica-se como
+sobrevivente (**`Survived`** = `Yes`) e não sobrevivente (**`Survived`**
+= `No`) caso contrário. Com essa regra de classificação obtêm-se a
+proporção de `r errglm50` classificações incorretas no conjunto de
+teste.
+
+### Regressão Linear ###
+
+Similarmente à regressão logística este também é um modelo fundamentado
+na teoria dos modelos lineares generalizados, porém é definido no plano
+cartesiano, por assumir a distribuição Normal à variável de interesse
+condicionada as covariável, e sendo assim tem solução geométrica
+análitica (de mínimos quadrados). A regressão Gaussiana é o único modelo
+dessa classe com essa característica. O modelo é definido conforme
+especificação abaixo:
+$$
+\begin{gathered}
+    \text{Survived}_i \mid \text{Class}_i,\, \text{Sex}_i, \text{Age}_i
+    \sim \text{Normal}(\mu_i, \sigma^2)\\
+    \mu_i =
+    \beta_0 +
+    \beta_{11} X_{2st,i} + \beta_{12} X_{3st,i} + \beta_{13} X_{Crew,i} +
+    \beta_2 X_{Male,i} + \beta_3 X_{Child,i}
+\end{gathered}
+$$
+
+em que $i$ representa as características do i-ésimo indivíduo, $i=1, 2,
+\ldots, n$. $\underline{\beta}$ é o vetor dos parâmetros que representam
+os efeitos das covariáveis. E $X_{j, i}$ é uma variável binária que
+assume, para o i-ésimo indivíduo: 1 se a variável **`Class`** é igual a
+$j$ e 0 caso contrário, para $j=2St,\,3St\,\text{e }Crew$; 1 se a
+variável **`Sex`** é igual a $Male$ e 0 caso contrário, para $j=Male$; e
+1 se a variável **`Age`** é igual a $Child$ e 0 caso contrário, para
+$j=Child$.
+
+Note que claramente esse não seria um modelo adequado uma vez que o
+domínio da distribuição Normal são os reais e, sendo assim, pode haver
+predições negativas e maiores que 1 para a média $\mu_i$. Isso é
+contemplado no modelo generalizado logístico, porém quando o interesse é
+somente predição, ambos são classificadores que devem ser avaliado,
+mesmo que a regressão linear tenha características inadequadas ao
+conjunto de dados.
+
+Com o modelo ajustado ao conjunto de dados de treino, exibe-se na Tabela
+3 os coeficientes estimados juntamente com seu erro padrão e respectivo
+teste de Wald.
+
+```{r fitlm}
+
+m0lm <- lm(as.integer(Survived) ~ ., data = da.train)
+
+tablm <- summary(m0lm)$coefficients
+rownames(tablm) <- paste0("$\\beta_{", ind, "}$")
+colnames(tablm) <- gsub("\\|", "\\\\|", colnames(tablm))
+pander::pander(tablm,
+               caption = paste("Coeficientes estimados e teste",
+                               "de Wald para o modelo Gaussiano"),
+               justify = c("left", rep("center", 4)),
+               style = "rmarkdown")
+
+##-------------------------------------------
+## Risco estimado
+plm <- predict(m0lm, newdata = da.teste) - 1
+pred.lm50 <- ifelse(plm >= 0.5, "Yes", "No")
+errlm50 <- sum(da.teste[, 4] != pred.lm50)/nrow(da.teste)
+
+```
+
+Novamente, assim como realizado no modelo logístico, faremos a
+classificação a partir da probabilidade predita pelo modelo
+Gaussiano. Conforme discutido anterior essa predição de probabilidade
+tem diversas falhas, sendo a mais agravante não respeitar o espaço
+paramétrico (pode-se ter probabilidade maiores que 1 e menores que 0),
+porém utilizando a regra da classificação $\hat{\mu_i} > 0.5$
+classifica-se como sobrevivente (**`Survived`** = `Yes`) e não
+sobrevivente (**`Survived`** = `No`) caso contrário, temos uma proporção
+de classificações incorretas no conjunto de teste de `r errlm50`.
+
+### Naive Bayes ###
+
+Este é um classificador fundamentado a partir do teorema de bayes. Como
+o principal objetivo em classificação é estimar $\Pr[Y=c \mid X]\,
+\forall\, c \in \mathbb{C}$, sendo $\mathbb{C}$ o conjunto de categorias
+da variável resposta, utilizando o Teorema de Bayes temos:
+
+$$
+\Pr(Y=c \mid x) =
+    \frac{f(\underline{x} \mid Y = c)\Pr(Y=c)}{\sum_{s \in \mathbb{C}}
+        f(\underline{x} \mid Y=s)\Pr(Y=s)}
+$$
+
+e assim calcula-se $\Pr(Y=c \mid x)$ estimando $Pr(Y=c)$, comumente como
+proporções amostrais e $f(\underline{x} \mid Y=c)$, onde o classificador
+Naive Bayes supõe independência condicional
+$$
+f(\underline{x} \mid Y=c) = \prod_{j=1}^p f(x_j \mid Y=y)
+$$
+
+Para os dados do Titani todas as covariáveis são categóricas, portanto
+assume-se $f(x_j \mid Y = c)$ como uma distribuição Multinomial (ou
+Binomial no caso de duas categorias), assim têm-se 16 probabilidades a
+serem calculadas conforme exibe-se na Tabela 4.
+
+```{r fitnaives}
+
+m0naive <- naiveBayes(Survived ~., data = da.train)
+
+tabnaive <- do.call(cbind, m0naive$tables)
+## vars <- c(rep("Class", 4), rep("Sex", 2), rep("Age", 2))
+## cnam <- paste0("$X_{", vars, "} = ", colnames(tabnaive), "$")
+## colnames(tabnaive) <- cnam
+
+pander::pander(tabnaive,
+               caption = paste("Probabilidades estimadas para cada",
+                               "categoria de cada covariável",
+                               "condicional a Survived"),
+               ## justify = c("left", rep("center", 4)),
+               digits = 3,
+               style = "rmarkdown")
+
+##-------------------------------------------
+## Risco estimado
+pnaive <- predict(m0naive, newdata = da.teste, type = "raw")[, 2]
+pred.naive50 <- ifelse(pnaive >= 0.5, "Yes", "No")
+errnaive50 <- sum(da.teste[, 4] != pred.naive50)/nrow(da.teste)
+
+```
+
+Com a regra da classificação $\hat{\Pr}($**`Survived`**=`Yes`$\mid
+\underline{x}^t_i) > 0.5$ classificado como sobrevivente
+(**`Survived`** = `Yes`) e não sobrevivente (**`Survived`** = `No`) caso
+contrário, temos uma proporção de classificações incorretas no conjunto
+de teste de `r errnaive50`.
+
+### Análise Discriminante Linear ###
+
+Em análise discriminante linear de Fisher, ainda utiliza-se o teorema de
+Bayes da mesma forma como descrito na seção [Naive Bayes](#naive-bayes),
+porém assume-se para $f(\underline{x} \mid Y=c)$ a distribuição Normal
+multivariada de parâmetros $\underline{\mu_c}$ e matriz de variâncias e
+covariâncias $\Sigma$ comum para a toda categoria $c \in \mathbb{C}$
+
+Perceba-se que aparentemente essa abordagem não parece satisfatória uma
+vez que todo o conjunto de covariáveis é categórica, assim estamos
+assumindo uma distribuição Normal para algo que é claramente
+discreto. Todavia como já discutido na seção
+[Regressão Linear](#regresao-linear) o interesse é apenas preditivo, e
+sendo assim, podemos construir uma regra de classificação que será
+posteriormente avaliada. O classificador ajustado ao conjunto de
+treinamento é exibido abaixo.
+
+```{r fitlda}
+
+m0lda <- lda(x = da.train[, -4], grouping = da.train[, 4])
+m0lda
+
+##-------------------------------------------
+## Risco estimado
+plda <- predict(m0lda, newdata = X.teste[, -4])[["posterior"]][, 2]
+pred.lda50 <- ifelse(plda >= 0.5, "Yes", "No")
+errlda50 <- sum(da.teste[, 4] != pred.lda50)/nrow(da.teste)
+
+```
+
+Com a regra da classificação $\hat{\Pr}($**`Survived`**=`Yes`$\mid
+\underline{x}^t_i) > 0.5$ classificado como sobrevivente
+(**`Survived`** = `Yes`) e não sobrevivente (**`Survived`** = `No`) caso
+contrário, temos uma proporção de classificações incorretas no conjunto
+de teste de `r errlda50`.
+
+### Análise Discriminante Quadrática ###
+
+A análise discriminante quadrática de Fisher segue o mesmo princípio da
+análise discriminante linear, porém flexibiliza $f(\underline{x} \mid
+Y=c)$ estimando uma matriz de variâncias e covariâncias $Sigma$ para
+cada classe $c \in \mathbb{C}$, ou seja, nessa abordagem assume-se que
+$$
+[\underline{x} \mid Y=c] \sim \text{Normal}(\mu_c, \Sigma_c) \quad
+    \forall \, c \in \mathbb{C}
+$$
+
+Novamente as mesmas considerações feitas na abordagem via análise
+discriminante linear se aplicam. O resultado do classificador ajustado
+aos dados de treino é exibido abaixo
+
+```{r fitqda}
+
+m0qda <- qda(x = da.train[, -4], grouping = da.train[, 4])
+m0qda
+
+##-------------------------------------------
+## Risco estimado
+pqda <- predict(m0qda, newdata = X.teste[, -4])[["posterior"]][, 2]
+pred.qda50 <- ifelse(pqda >= 0.5, "Yes", "No")
+errqda50 <- sum(da.teste[, 4] != pred.qda50)/nrow(da.teste)
+
+```
+
+Analógo com o classificador construído a partir da análise discriminante
+linear. Utilizamos a regra da classificação
+$\hat{\Pr}($**`Survived`**=`Yes`$\mid \underline{x}^t_i) > 0.5$
+classificado como sobrevivente (**`Survived`** = `Yes`) e não
+sobrevivente (**`Survived`** = `No`) caso contrário, temos uma proporção
+de classificações incorretas no conjunto de teste de `r errqda50`.
+
+### K-NN: k-Nearest Neighbor ###
+
+Este método se diferencia dos demais por ser totalmente não paramétrico,
+não há suposição de distribuição ou quaisquer parâmetros a ser
+estimados. O método se baseia em classificar ou predizer os valores da
+variável de interesse a partir dos valores de seus `k` vizinhos, no caso
+de classificação, classifica-se uma nova observação como a moda das `k`
+observações mais próximos e no caso de predição (considerar uma variável
+resposta não categórica) prediz-se com base na média. A proximidade é
+dada por distâncias euclidianas e o valor de quantas observações devem
+ser usadas para classificação ou predição, `k`, é realizada por
+validação cruzada.
+
+```{r cvknn, cache=TRUE}
+
+## Parte bem demorada...
+kseq <- seq(1, nrow(X.train), by = 2)
+errs <- sapply(k.seq, function(k) {
+    m0 <- knn(train = X.train[, -4], test = X.teste[, -4],
+              cl = X.train[, 4], k = k)
+    sum(X.teste[, 4] != m0)/nrow(X.teste)
+})
+
+```
+
+```{r plotcvknn, fig.height=4, fig.width=9, fig.cap="Proporção de classificações incorretas pelo classificador KNN com diferentes k's. Todos os possíveis k's ímpares (esquerda) e apenas os k's próximos do k ótimo."}
+
+## Exibe graficamente
+da <- data.frame(k = kseq, R = errs)
+
+xy1 <- xyplot(R ~ k,
+              type = "S",
+              data = da,
+              ylab = expression(hat(R)),
+              panel = function(x, y, subscripts, ...) {
+                  panel.grid()
+                  panel.xyplot(x, y, ...)
+                  panel.abline(h = min(y, na.rm = TRUE),
+                               v = x[which.min(y)],
+                               lty = 2)
+              })
+
+## Exibe apenas os 8 k's mais próximos (acima e abaixo) do mínimo
+k.min <- kseq[which.min(errs)]
+index <- c(-6:10) + which.min(errs)
+
+xy2 <- xyplot(R ~ k,
+              type = c("S", "p"),
+              pch = 19,
+              data = da[index, ],
+              ylab = expression(hat(R)),
+              panel = function(x, y, subscripts, ...) {
+                  panel.grid()
+                  panel.xyplot(x, y, ...)
+                  panel.abline(h = min(y, na.rm = TRUE),
+                               v = x[which.min(y)],
+                               lty = 2)
+              })
+
+print(xy1, split = c(1, 1, 2, 1), more = TRUE)
+print(xy2, split = c(2, 1, 2, 1), more = FALSE)
+
+```
+
+```{r fitknn}
+
+m0knn <- knn(train = X.train[, -4], test = X.teste[, -4],
+             cl = da.train[, 4], k = k.min, prob = TRUE)
+
+##-------------------------------------------
+## Risco estimado
+pknn <- ifelse(m0knn == "Yes", attr(m0knn, "prob"),
+               1 - attr(m0knn, "prob"))
+pred.knn50 <- ifelse(pknn >= 0.5, "Yes", "No")
+errknn50 <- sum(da.teste[, 4] != pred.knn50)/nrow(da.teste)
+
+```
+
+Na \autoref{fig:plotcvknn} utilizamos o método considerando diferente
+número de vizinhos, `k`, para determinar o `k` definitivo a ser
+utilizado para classificação. Na figura são exibidos a proporção de
+classificações incorretas denotada por $\hat{R}$ no eixo das
+ordenadas. O número de vizinhos que proporcionou a menor proporção de
+classificações incorretas foi de `r k.min` vizinhos, com uma proporção
+de `r errknn50`.
+
+### Comparação dos métodos ###
+
+Para comparação dos métodos será utilizado, além da proporção de
+classificações incorretas as medidas de sensibilidade e especificadade
+calculadas a partir da matriz de confusão obtida por cada
+classificador.
+
+```{r}
+
+## Lista de probabilidades estimadas com base nos modelos de
+## classificação vistos anteriormente
+lista <- list("GLM" = pglm, "LM" = plm, "NB" = pnaive,
+              "LDA" = plda, "QDA" = pqda, "KNN" = pknn)
+
+## Tabela de comparação com calculo de escore que dá mais importância
+## para taxa de acertos do que para sens e espe
+compare <- sapply(lista, confmeds, teste = da.teste[, 4], corte = 0.5)
+escore <- apply(compare, 2, function(x) (2 * x[1] + x[2] + x[3]) / 4)
+
+## Exibindo em formato de tabela
+compare <- rbind(compare, escore)
+rownames(compare) <- c("Prop. de Acertos",
+                       "Sensibilidade",
+                       "Especificidade",
+                       "Escore")
+pander::pander(compare,
+               caption = paste("Comparação dos métodos utilizando o",
+                               "ponto de corte usual de 0.5"),
+               justify = c("left", rep("center", 6)),
+               digits = 4,
+               style = "rmarkdown")
+
+```
+
+Na Tabela 5 são exibidas as medidas para comparação dos classificadores
+com base na probabilidade de corte de 0.5. Todos os métodos apresentados
+neste trabalho contém alguma medida que pode ser interpretada como uma
+estimativa da probabilidade. O modelo logístico é naturalmente um modelo
+para prever a probabilidade, o Gaussiano ainda que não respeite o espaço
+paramétrico da probabilidade a estima, o Naive Bayes assim como as
+análises discriminantes de Fisher utilizam do teorema de Bayes para
+estimar probabilidades e no K-NN podemos estimar essa probabilidade como
+a proporção dos k vizinos mais próximos em certa
+categoria.
+
+```{r rocs, fig.show="hide"}
+
+## Calcula as medidas resumo da matriz de confusao para cada
+## classificador em cada ponto de corte definido por pseq
+pseq <- seq(0.1, 0.9, by = 0.01)
+rocs <- lapply(lista, function(p) {
+    ROC(test = p, stat = da.teste[, 4])
+    ## meds <- do.call(
+    ##     rbind, lapply(pseq, confmeds, prob = p, teste = da.teste[, 4]))
+    ## as.data.frame(meds)
+})
+
+```
+
+```{r plotroc, fig.cap="Curvas ROC (Receiver Operating Characteristic) para cada modelo de classificação com indicação do melhor ponto de corte e respectivo AUC (Area Under Curve)."}
+
+## Organiza em data.frame
+da <- plyr::ldply(lapply(rocs, function(x) {
+    da <- data.frame(sens = x$res[, "sens"],
+                     espe = x$res[, "spec"],
+                     auc = x$AUC)
+    da$pcor <- x$res[which.max(with(da, sens + espe)), 5]
+    da
+}), .id = "Model")
+
+fl <- c("Generalized Linear Model",
+        "Linear Model",
+        "Naive bayes",
+        "Linear Discriminant",
+        "Quadratic Discriminant",
+        "K-Nearest Neighbor")
+
+xyplot(sens ~ 1-espe | Model,
+       data = da,
+       layout = c(NA, 2),
+       as.table = TRUE,
+       type = c("l", "g"),
+       lwd = 2,
+       xlab = "1 - Especificidade",
+       ylab = "Sensibilidade",
+       strip = strip.custom(factor.levels = fl),
+       panel = function(x, y, subscripts, ...) {
+           index <- which.max(1 + y - x)
+           texto <- paste("Ponto de corte:\n",
+                          round(da$pcor[subscripts], 4))
+           texto2 <- paste("Área abaixo da curva: ",
+                           round(da$auc[subscripts], 4))
+           panel.xyplot(x, y, ...)
+           panel.text(x[index], y[index] + 0.15, texto, cex = 0.8)
+           panel.points(x[index], y[index], pch = 3, lwd = 3)
+           panel.text(0.5, 0.01, texto2, cex = 0.8)
+       })
+
+```
+
+```{r}
+
+## Tabela de comparação com calculo de escore que dá mais importância
+## para taxa de acertos do que para sens e espe
+
+cortes <- with(da, tapply(pcor, Model, unique))
+compare <- sapply(1:length(cortes), function(i) {
+    confmeds(lista[[i]], teste = da.teste[, 4], corte = cortes[i])
+})
+escore <- apply(compare, 2, function(x) (2 * x[1] + x[2] + x[3]) / 4)
+
+## Exibindo em formato de tabela
+compare <- rbind(compare, escore)
+compare <- rbind(compare, with(da, tapply(auc, Model, unique)))
+rownames(compare) <- c("Prop. de Acertos",
+                       "Sensibilidade",
+                       "Especificidade",
+                       "Escore",
+                       "AUC")
+pander::pander(compare,
+               caption = paste("Comparação dos métodos utilizando o",
+                               "ponto de corte usual de 0.5"),
+               justify = c("left", rep("center", 6)),
+               digits = 4,
+               style = "rmarkdown")
+
+```
+
+
 
 ## Material suplementar ##
 
