@@ -1,7 +1,7 @@
 ---
 title: Aprendizado de Máquina
 subtitle: UFMG EST171 - 2ª Lista de exercícios
-author: EERJ
+author: Eduardo Elias Ribeiro Junior
 date: 04 de outubro de 2016
 output:
   pdf_document:
@@ -276,7 +276,7 @@ trabalho.
 ```{r, echo=TRUE}
 
 ## Particionando o conjunto de dados
-dasplit <- mysplit(dados, percent = c (0.7, 0.3), seed = 2016)
+dasplit <- mysplit(dados, percent = c(0.7, 0.3), seed = 1994)
 
 ## Número de observações em cada partição
 sapply(dasplit, nrow)
@@ -461,7 +461,6 @@ tabnaive <- do.call(cbind, m0naive$tables)
 ## vars <- c(rep("Class", 4), rep("Sex", 2), rep("Age", 2))
 ## cnam <- paste0("$X_{", vars, "} = ", colnames(tabnaive), "$")
 ## colnames(tabnaive) <- cnam
-
 pander::pander(tabnaive,
                caption = paste("Probabilidades estimadas para cada",
                                "categoria de cada covariável",
@@ -503,12 +502,12 @@ treinamento é exibido abaixo.
 
 ```{r fitlda}
 
-m0lda <- lda(x = da.train[, -4], grouping = da.train[, 4])
+m0lda <- lda(Survived ~ ., data = da.train)
 m0lda
 
 ##-------------------------------------------
 ## Risco estimado
-plda <- predict(m0lda, newdata = X.teste[, -4])[["posterior"]][, 2]
+plda <- predict(m0lda, newdata = da.teste[, -4])[["posterior"]][, 2]
 pred.lda50 <- ifelse(plda >= 0.5, "Yes", "No")
 errlda50 <- sum(da.teste[, 4] != pred.lda50)/nrow(da.teste)
 
@@ -537,12 +536,12 @@ aos dados de treino é exibido abaixo
 
 ```{r fitqda}
 
-m0qda <- qda(x = da.train[, -4], grouping = da.train[, 4])
+m0qda <- qda(Survived ~ ., data = da.train)
 m0qda
 
 ##-------------------------------------------
 ## Risco estimado
-pqda <- predict(m0qda, newdata = X.teste[, -4])[["posterior"]][, 2]
+pqda <- predict(m0qda, newdata = da.teste[, -4])[["posterior"]][, 2]
 pred.qda50 <- ifelse(pqda >= 0.5, "Yes", "No")
 errqda50 <- sum(da.teste[, 4] != pred.qda50)/nrow(da.teste)
 
@@ -565,17 +564,40 @@ de classificação, classifica-se uma nova observação como a moda das `k`
 observações mais próximos e no caso de predição (considerar uma variável
 resposta não categórica) prediz-se com base na média. A proximidade é
 dada por distâncias euclidianas e o valor de quantas observações devem
-ser usadas para classificação ou predição, `k`, é realizada por
+ser usadas para classificação ou predição, `k`, é realizada
+separando 20\% da base de treino para validação.
+
+Nesse trabalho utiliza-se ainda, o algoritmo `ANN` (_Approximate Nearest
+Neighbor Searching_), proposto em 1993 por Arya S. and Mount D.M. para
+aplicação do KNN em problemas de alta dimensão onde os algoritmos
+convencionais para cálculo de distância são ineficientes. Esse algoritmo
+é implementado em `C++` e está disponível em R no pacote `FNN` (via
+argumento `algorithm = "kd_tree"`, nas funções do
+pacote)[^ann]. Utilizou-se deste algoritmo para escolhe do melhor `k` via
 validação cruzada.
+
+```{r}
+
+## Separa a parte do treino para validação
+train.split <- mysplit(da.train, percent = c(0.8, 0.2), seed = 1994)
+
+## Organiza em data.frame e transforma para valores inteiros
+da.train2 <- train.split[[1]]
+da.valid <- train.split[[2]]
+X.train2 <- sapply(da.train2, as.integer)
+X.valid <- sapply(da.valid, as.integer)
+
+```
 
 ```{r cvknn, cache=TRUE}
 
-## Parte bem demorada...
-kseq <- seq(1, nrow(X.train), by = 2)
-errs <- sapply(k.seq, function(k) {
-    m0 <- knn(train = X.train[, -4], test = X.teste[, -4],
-              cl = X.train[, 4], k = k)
-    sum(X.teste[, 4] != m0)/nrow(X.teste)
+## Parte bem demorada, pois faz-se para todos os k's, embora fosse
+## necessário apenas para alguns...
+kseq <- seq(1, nrow(X.train2), by = 2)
+errs <- sapply(kseq, function(k) {
+    m0 <- FNN::knn(train = X.train2[, -4], test = X.valid[, -4],
+                   cl = X.train2[, 4], k = k, algorithm = "kd_tree")
+    sum(X.valid[, 4] != m0)/nrow(X.valid)
 })
 
 ```
@@ -599,7 +621,8 @@ xy1 <- xyplot(R ~ k,
 
 ## Exibe apenas os 8 k's mais próximos (acima e abaixo) do mínimo
 k.min <- kseq[which.min(errs)]
-index <- c(-6:10) + which.min(errs)
+index <- c(-10:10) + which.min(errs)
+index <- index[index > 0]
 
 xy2 <- xyplot(R ~ k,
               type = c("S", "p"),
@@ -621,8 +644,9 @@ print(xy2, split = c(2, 1, 2, 1), more = FALSE)
 
 ```{r fitknn}
 
-m0knn <- knn(train = X.train[, -4], test = X.teste[, -4],
-             cl = da.train[, 4], k = k.min, prob = TRUE)
+## Ajusta o classificador com base no k ótimo
+m0knn <- class::knn(train = X.train[, -4], test = X.teste[, -4],
+                    cl = da.train[, 4], k = k.min, prob = TRUE)
 
 ##-------------------------------------------
 ## Risco estimado
@@ -683,24 +707,60 @@ para prever a probabilidade, o Gaussiano ainda que não respeite o espaço
 paramétrico da probabilidade a estima, o Naive Bayes assim como as
 análises discriminantes de Fisher utilizam do teorema de Bayes para
 estimar probabilidades e no K-NN podemos estimar essa probabilidade como
-a proporção dos k vizinos mais próximos em certa
-categoria.
+a proporção dos k vizinos mais próximos em certa categoria.
+
+As avaliações até agora, foram realizadas com o classificador obtidos
+considerando o ponto de corte 0.5, nas probabilidades estimadas. Todavia
+pode-se encontrar o ponto de corte ótimo para cada método considerando um
+conjunto de validação. Ilustramos os resultados desse procedimento a
+seguir.
 
 ```{r rocs, fig.show="hide"}
+
+## Atualiza os modelos considerando somente o conjunto de treinamento
+## reduzido da base de validação
+m1glm   <- update(m0glm, data = da.train2)
+m1lm    <- update(m0lm, data = da.train2)
+m1lda   <- update(m0lda, data = da.train2)
+m1qda   <- update(m0qda, data = da.train2)
+m1naive <- naiveBayes(Survived ~., data = da.train2)
+m1knn   <- class::knn(train = X.train2[, -4], test = X.valid[, -4],
+                      cl = da.train2[, 4], k = k.min, prob = TRUE)
+
+## Calcula as probabilidades
+listacv <- list(
+    prglm   = predict(m1glm, newd = da.valid, type = "response"),
+    prlm    = predict(m1lm, newd = da.valid) - 1 ,
+    prlda   = predict(m1lda, newd = da.valid[, -4])[["posterior"]][, 2],
+    prqda   = predict(m1qda, newd = da.valid[, -4])[["posterior"]][, 2],
+    prnaive = predict(m1naive, newd = da.valid, type = "raw")[, 2],
+    prknn   = ifelse(m1knn == "Yes", attr(m1knn, "prob"),
+                     1 - attr(m0knn, "prob"))
+)
 
 ## Calcula as medidas resumo da matriz de confusao para cada
 ## classificador em cada ponto de corte definido por pseq
 pseq <- seq(0.1, 0.9, by = 0.01)
-rocs <- lapply(lista, function(p) {
-    ROC(test = p, stat = da.teste[, 4])
+rocs <- lapply(listacv, function(p) {
+    ROC(test = p, stat = da.valid[, 4])
     ## meds <- do.call(
-    ##     rbind, lapply(pseq, confmeds, prob = p, teste = da.teste[, 4]))
+    ##     rbind, lapply(pseq, confmeds, prob = p, teste = da.valid[, 4]))
     ## as.data.frame(meds)
 })
 
 ```
 
-```{r plotroc, fig.cap="Curvas ROC (Receiver Operating Characteristic) para cada modelo de classificação com indicação do melhor ponto de corte e respectivo AUC (Area Under Curve)."}
+Na \autoref{fig:plotroc} apresentam-se as curvas ROC para todos os
+classificadores, essas foram contruídas a partir dos classificadores
+ajustados ao conjunto de treino, removendo 20\% dele para validação
+cruzada, ou seja, os resultados exibidos são com base na classificação
+de 20\% do conjunto de treinamento (`r nrow(da.valid)` observações). A
+partir deste da avaliação da curva ROC indentificou-se os pontos de
+corte que maximizam a soma entre sensibilidade e especificidade do
+classificador. Além disso pode-se notar também as semelhanças e
+características deles.
+
+```{r plotroc, fig.cap="Curvas ROC (Receiver Operating Characteristic) para cada modelo de classificação com indicação do melhor ponto de corte e respectivo AUC (Area Under Curve) para o conjunto de validação."}
 
 ## Organiza em data.frame
 da <- plyr::ldply(lapply(rocs, function(x) {
@@ -737,42 +797,63 @@ xyplot(sens ~ 1-espe | Model,
            panel.text(x[index], y[index] + 0.15, texto, cex = 0.8)
            panel.points(x[index], y[index], pch = 3, lwd = 3)
            panel.text(0.5, 0.01, texto2, cex = 0.8)
+           panel.abline(a = 0, b = 1, col = "gray70", lty = 2)
        })
 
 ```
+
+Contruindo a regra de classificação a partir dos pontos de cortes ótimos
+exibidos na \autoref{fig:plotroc} temos na Tabela 6 os resumos da matriz
+de confusão, quando classificadas as `r nrow(da.teste)` observações do
+conjunto de teste.
 
 ```{r}
 
 ## Tabela de comparação com calculo de escore que dá mais importância
 ## para taxa de acertos do que para sens e espe
-
 cortes <- with(da, tapply(pcor, Model, unique))
 compare <- sapply(1:length(cortes), function(i) {
     confmeds(lista[[i]], teste = da.teste[, 4], corte = cortes[i])
 })
-escore <- apply(compare, 2, function(x) (2 * x[1] + x[2] + x[3]) / 4)
+## escore <- apply(compare, 2, function(x) (2 * x[1] + x[2] + x[3]) / 4)
 
 ## Exibindo em formato de tabela
-compare <- rbind(compare, escore)
-compare <- rbind(compare, with(da, tapply(auc, Model, unique)))
 rownames(compare) <- c("Prop. de Acertos",
                        "Sensibilidade",
-                       "Especificidade",
-                       "Escore",
-                       "AUC")
+                       "Especificidade")
+colnames(compare) <- names(lista)
 pander::pander(compare,
-               caption = paste("Comparação dos métodos utilizando o",
-                               "ponto de corte usual de 0.5"),
+               caption = paste(
+                   "Comparação dos métodos via resumos da matriz",
+                   "de confusão da classificação vs. teste,",
+                   "utilizando o ponto de corte ótimo (obtido por",
+                   "validação cruzada)"),
                justify = c("left", rep("center", 6)),
                digits = 4,
                style = "rmarkdown")
 
 ```
 
-
+Note que embora na validação cruzada o método KNN tenha sido o de pior
+desempenho, quando ajustado a todo conjunto de treinamento e utilizado
+para classificação do conjunto de teste essa abordagem obteve os
+melhores resultados. Todavia cabe salientar que o método KNN é o menos
+parcimonioso de todos os avaliados, pois sua especificidade é muito alta
+em contraste com sua sensibilidade que é muito baixa, em comparação com
+os demais. Outro fato interessante dessa análise é que os
+classificadores baseados no modelo Logístico, Linear e Naive Bayes
+resultaram nas mesmas classificações e, além disso os demais resultados,
+com excessão do KNN, também foram bastante similares, isso sugere que a
+cojunto de dados analisado apresenta um comportamento das covariáveis
+com dentro das categorias bastante característico, o que leva os
+classificadores a predizer da mesma forma.
 
 ## Material suplementar ##
 
 Todos os códigos (para manipulação, ajustes e gráficos) exibidos neste
 trabalho estão disponíveis no endereço
 <https://jreduardo.github.io/est171-ml/>.
+
+<!--------------------------------------------- -->
+[^ann]: _Paper:_ <http://www.cs.umd.edu/~mount/Papers/soda93-ann.pdf>\
+    Page: <https://www.cs.umd.edu/~mount/ANN/>.
