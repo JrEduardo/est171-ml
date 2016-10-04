@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Eduardo Elias Ribeiro Junior" />
+
+
+<title>Aprendizado de Máquina</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/yeti.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+div.sourceCode {
+  overflow-x: visible;
+}
+</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="_style.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 45px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+
+.section h2 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h3 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h4 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h5 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h6 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("show" === "show");
+});
+</script>
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html"></a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Listas
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="lista1.html">Lista 1</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown-header">Seminário</li>
+<li class="dropdown-header">Pôster</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://jreduardo.github.io/">Eduardo Jr's website</a>
+</li>
+<li>
+  <a href="https://github.com/JrEduardo/ce064-ml">
+    <span class="fa fa-github-alt fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Aprendizado de Máquina</h1>
+<h3 class="subtitle"><em>UFMG EST171 - 2ª Lista de exercícios</em></h3>
+<h4 class="author"><em>Eduardo Elias Ribeiro Junior</em></h4>
+<h4 class="date"><em>04 de outubro de 2016</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#exercicio-1">Exercício 1</a><ul>
+<li><a href="#regressao-logistica">Regressão Logística</a></li>
+<li><a href="#regressao-linear">Regressão Linear</a></li>
+<li><a href="#naive-bayes">Naive Bayes</a></li>
+<li><a href="#analise-discriminante-linear">Análise Discriminante Linear</a></li>
+<li><a href="#analise-discriminante-quadratica">Análise Discriminante Quadrática</a></li>
+<li><a href="#k-nn-k-nearest-neighbor">K-NN: k-Nearest Neighbor</a></li>
+<li><a href="#comparacao-dos-metodos">Comparação dos métodos</a></li>
+</ul></li>
+<li><a href="#material-suplementar">Material suplementar</a></li>
+</ul>
+</div>
+
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Para partição de uma base de dados em dados de treinamento,
+## validação, teste, etc.
+mysplit &lt;-<span class="st"> </span>function(data, <span class="dt">percent =</span> <span class="ot">NA</span>, <span class="dt">nfolds =</span> <span class="ot">NA</span>,
+                    <span class="dt">nobs =</span> <span class="ot">NA</span>, <span class="dt">seed =</span> <span class="ot">NULL</span>) {
+    if (<span class="kw">sum</span>(<span class="kw">is.na</span>(<span class="kw">c</span>(percent, nfolds, nobs))) !=<span class="st"> </span><span class="dv">2</span>) {
+        <span class="kw">stop</span>(<span class="st">&quot;Utilize um e apenas um dos argumentos&quot;</span>)
+    }
+    n &lt;-<span class="st"> </span><span class="kw">nrow</span>(data)
+    if (!<span class="kw">sum</span>(<span class="kw">is.na</span>(percent))) {
+        if (<span class="kw">sum</span>(percent) !=<span class="st"> </span><span class="dv">1</span>) {
+            <span class="kw">stop</span>(<span class="st">&quot;Os percentuais em cada dobra devem somar 1!&quot;</span>)
+        }
+        p &lt;-<span class="st"> </span>percent
+        folds &lt;-<span class="st"> </span>n *<span class="st"> </span>p
+    }
+    if (!<span class="kw">is.na</span>(nfolds)) {
+        if (nfolds &gt;<span class="st"> </span>n) {
+            <span class="kw">stop</span>(<span class="kw">paste0</span>(<span class="st">&quot;O número de dobras não deve exceder o &quot;</span>,
+                       <span class="st">&quot;tamanho da amostra (n=&quot;</span>, n, <span class="st">&quot;)!&quot;</span>))
+        }
+        p &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="dv">1</span>/nfolds, nfolds)
+        folds &lt;-<span class="st"> </span>n *<span class="st"> </span>p
+    }
+    if (!<span class="kw">sum</span>(<span class="kw">is.na</span>(nobs))) {
+        if (<span class="kw">sum</span>(nobs) !=<span class="st"> </span>n) {
+            <span class="kw">stop</span>(<span class="kw">paste0</span>(<span class="st">&quot;O número de observações em cada dobra deve &quot;</span>,
+                       <span class="st">&quot;somar &quot;</span>, n, <span class="st">&quot;!&quot;</span>))
+        }
+        folds &lt;-<span class="st"> </span>nobs
+    }
+    if (!<span class="kw">is.null</span>(seed)) {
+        <span class="kw">set.seed</span>(seed)
+    }
+    folds &lt;-<span class="st"> </span><span class="kw">round</span>(folds)
+    while (<span class="kw">sum</span>(folds) !=<span class="st"> </span>n) {
+        g &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dv">1</span>:<span class="kw">length</span>(folds), <span class="dv">1</span>)
+        if (<span class="kw">sum</span>(folds) &lt;<span class="st"> </span>n) {
+            folds[g] &lt;-<span class="st"> </span>folds[g] +<span class="st"> </span><span class="dv">1</span>
+        } else {
+            folds[g] &lt;-<span class="st"> </span>folds[g] -<span class="st"> </span><span class="dv">1</span>
+        }
+    }
+    out &lt;-<span class="st"> </span><span class="kw">vector</span>(<span class="st">&quot;list&quot;</span>, <span class="dt">length =</span> <span class="kw">length</span>(folds))
+    for (i in <span class="dv">1</span>:<span class="kw">length</span>(folds)) {
+        index &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="kw">nrow</span>(data), <span class="dt">size =</span> folds[i])
+        out[[i]] &lt;-<span class="st"> </span>data[index, ]
+        data &lt;-<span class="st"> </span>data[-index, ]
+    }
+    <span class="kw">return</span>(out)
+}
+
+
+## Medidas resumo da matriz de confusão
+confmeds &lt;-<span class="st"> </span>function(probs, teste, <span class="dt">corte =</span> <span class="fl">0.5</span>) {
+    ##-------------------------------------------
+    ## Restrita para classificadores com duas categorias
+    ## A probabilidade em probs é da ultima categoria, ordenada por
+    ## ordem alfabética
+    ##-------------------------------------------
+    te &lt;-<span class="st"> </span><span class="kw">as.integer</span>(teste) -<span class="st"> </span><span class="dv">1</span>
+    cl &lt;-<span class="st"> </span><span class="kw">ifelse</span>(probs &lt;=<span class="st"> </span>corte, <span class="dv">0</span>, <span class="dv">1</span>)
+    ##-------------------------------------------
+    pace &lt;-<span class="st"> </span><span class="kw">sum</span>(cl ==<span class="st"> </span>te) /<span class="st"> </span><span class="kw">length</span>(te)
+    espe &lt;-<span class="st"> </span><span class="kw">sum</span>(te[cl ==<span class="st"> </span>te] ==<span class="st"> </span><span class="dv">0</span>) /<span class="st"> </span><span class="kw">sum</span>(te ==<span class="st"> </span><span class="dv">0</span>)
+    sens &lt;-<span class="st"> </span><span class="kw">sum</span>(te[cl ==<span class="st"> </span>te] ==<span class="st"> </span><span class="dv">1</span>) /<span class="st"> </span><span class="kw">sum</span>(te ==<span class="st"> </span><span class="dv">1</span>)
+    pvp &lt;-<span class="st"> </span><span class="kw">sum</span>(cl[cl !=<span class="st"> </span>te] ==<span class="st"> </span><span class="dv">0</span>) /<span class="st"> </span><span class="kw">sum</span>(cl ==<span class="st"> </span><span class="dv">0</span>)
+    pvn &lt;-<span class="st"> </span><span class="kw">sum</span>(cl[cl !=<span class="st"> </span>te] ==<span class="st"> </span><span class="dv">1</span>) /<span class="st"> </span><span class="kw">sum</span>(cl ==<span class="st"> </span><span class="dv">1</span>)
+    ##-------------------------------------------
+    ## tab &lt;- table(cl, teste); print(tab)
+    ## if (sum(dim(tab)) == 4) {
+    ##     senst &lt;- tab[1, 1] / sum(tab[, 1])
+    ##     espet &lt;- tab[2, 2] / sum(tab[, 2])
+    ##     pacet &lt;- sum(diag(tab))/sum(tab)
+    ##     print(c(senst, espet, pacet))
+    ## }
+    out &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;pace&quot;</span> =<span class="st"> </span>pace,
+             <span class="st">&quot;sens&quot;</span> =<span class="st"> </span>sens,
+             <span class="st">&quot;espe&quot;</span> =<span class="st"> </span>espe
+             ## &quot;pvn&quot; = pvn,
+             ## &quot;pvp&quot; = pvp
+             )
+    ## attr(out, &quot;class&quot;) = &quot;rocmeds&quot;
+    <span class="kw">return</span>(out)
+}
+
+## Exibição gráfica da matrix de confusão
+confusionPlot &lt;-<span class="st"> </span>function(cl, te) {
+    ##-------------------------------------------
+    lev &lt;-<span class="st"> </span><span class="kw">unique</span>(<span class="kw">c</span>(cl, te))
+    ## table(cl, te)
+    ma &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="kw">sum</span>(te[cl ==<span class="st"> </span>te] ==<span class="st"> </span>lev[<span class="dv">1</span>]),
+                   <span class="kw">sum</span>(te[cl !=<span class="st"> </span>te] ==<span class="st"> </span>lev[<span class="dv">1</span>]),
+                   <span class="kw">sum</span>(te[cl !=<span class="st"> </span>te] ==<span class="st"> </span>lev[<span class="dv">2</span>]),
+                   <span class="kw">sum</span>(te[cl ==<span class="st"> </span>te] ==<span class="st"> </span>lev[<span class="dv">2</span>])),
+                 <span class="dt">ncol =</span> <span class="dv">2</span>, <span class="dt">byrow =</span> <span class="ot">FALSE</span>)
+    ##-------------------------------------------
+    espe &lt;-<span class="st"> </span>ma[<span class="dv">1</span>, <span class="dv">1</span>] /<span class="st"> </span><span class="kw">sum</span>(ma[, <span class="dv">1</span>])
+    sens &lt;-<span class="st"> </span>ma[<span class="dv">2</span>, <span class="dv">2</span>] /<span class="st"> </span><span class="kw">sum</span>(ma[, <span class="dv">2</span>])
+    perr &lt;-<span class="st"> </span><span class="dv">1</span> -<span class="st"> </span><span class="kw">sum</span>(<span class="kw">diag</span>(ma))/<span class="kw">sum</span>(ma)
+    texto &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="kw">c</span>(<span class="st">&quot;Classificações incorretas&quot;</span>,
+                     <span class="st">&quot;Especificidade&quot;</span>,
+                     <span class="st">&quot;Sensibilidade&quot;</span>),
+                   <span class="kw">round</span>(<span class="kw">c</span>(perr, espe, sens), <span class="dv">4</span>))
+    key &lt;-<span class="st"> </span><span class="kw">list</span>(
+        <span class="dt">space =</span> <span class="st">&quot;bottom&quot;</span>,
+        <span class="dt">lines =</span> <span class="kw">list</span>(<span class="dt">pch =</span> <span class="kw">rep</span>(<span class="ot">NA</span>, <span class="dv">3</span>), <span class="dt">lty =</span> <span class="kw">rep</span>(<span class="dv">0</span>, <span class="dv">3</span>)),
+        <span class="dt">text =</span> <span class="kw">list</span>(texto))
+    ##-------------------------------------------
+    colr &lt;-<span class="st"> </span><span class="kw">colorRampPalette</span>(<span class="kw">c</span>(<span class="st">&quot;gray90&quot;</span>, <span class="st">&quot;gray70&quot;</span>, <span class="st">&quot;gray50&quot;</span>))
+    xy &lt;-<span class="st"> </span><span class="kw">levelplot</span>(
+        <span class="kw">t</span>(<span class="kw">prop.table</span>(ma)),
+        <span class="dt">col.regions =</span> colr,
+        <span class="dt">at =</span> <span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">length.out =</span> <span class="dv">12</span>),
+        <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="fl">2.5</span>, <span class="fl">0.5</span>),
+        <span class="dt">aspect =</span> <span class="st">&quot;fill&quot;</span>,
+        <span class="dt">xlab.top =</span> <span class="kw">list</span>(<span class="st">&quot;Classificação&quot;</span>, <span class="dt">cex =</span> <span class="fl">1.2</span>,
+                        <span class="dt">font =</span> <span class="st">&quot;bold&quot;</span>),
+        <span class="dt">ylab =</span> <span class="kw">list</span>(<span class="st">&quot;Categoria</span><span class="ch">\n</span><span class="st">real&quot;</span>, <span class="dt">cex =</span> <span class="fl">1.2</span>,
+                    <span class="dt">rot =</span> <span class="dv">0</span>, <span class="dt">font =</span> <span class="st">&quot;bold&quot;</span>),
+        <span class="dt">xlab =</span> <span class="ot">NULL</span>,
+        <span class="dt">key =</span> key,
+        <span class="dt">scales =</span> <span class="kw">list</span>(
+            <span class="dt">at =</span> <span class="dv">1</span>:<span class="dv">2</span>,
+            <span class="dt">labels =</span> lev,
+            <span class="dt">tck =</span> <span class="dv">0</span>,
+            <span class="dt">cex =</span> <span class="fl">1.1</span>,
+            <span class="dt">x =</span> <span class="kw">list</span>(<span class="dt">alternating =</span> <span class="dv">2</span>)
+        ),
+        <span class="dt">par.settings =</span> <span class="kw">list</span>(
+            <span class="dt">layout.heights =</span> <span class="kw">list</span>(<span class="dt">xlab.key.padding =</span> <span class="dv">10</span>)
+        ),
+        <span class="dt">panel =</span> function(x, y, z, ...) {
+            <span class="kw">panel.levelplot</span>(<span class="dt">x =</span> x, <span class="dt">y =</span> y, <span class="dt">z =</span> z, ...)
+            <span class="kw">panel.text</span>(<span class="dt">x =</span> x, <span class="dt">y =</span> y, <span class="dt">col =</span> <span class="dv">1</span>,
+                       <span class="dt">labels =</span> <span class="kw">format</span>(<span class="kw">round</span>(z, <span class="dv">2</span>), <span class="dt">nsmall =</span> <span class="dv">2</span>))
+        })
+    <span class="kw">print</span>(xy)
+    <span class="kw">invisible</span>(xy)
+}</code></pre></div>
+<div id="exercicio-1" class="section level2">
+<h2>Exercício 1</h2>
+<blockquote>
+<p><em>Baixe o conjunto de dados <a href="./data/titanic.txt"><code>titanic.txt</code></a>. Cada observação deste banco é relativa a um passageiro do Titanic. As covariáveis indicam características deste passageiros; a variável resposta indica se o passageiro sobreviveu ou não ao naufrágio.<br />
+ Seu objetivo é criar classificadores para predizer a variável resposta com base nas covariáveis disponíveis. Para tanto, você deverá implementar os seguintes classificadores, assim como estimar seus riscos via conjunto de teste:</em></p>
+</blockquote>
+<p>O conjunto de dados <code>Titanic</code> é apresentado na Tabela 1. As características dos passageiros disponíveis nesse conjunto são: classe econômica - <strong><code>Class</code></strong>, de quatro categorias; sexo - <strong><code>Sex</code></strong>, de duas categorias; e idade do passageiro - <strong><code>Age</code></strong>, categorizada em adultos ou crianças. Para todos os cruzamentos dessas covariáveis têm-se a frequência de sobreviventes e não sobreviventes - <strong><code>Survived</code></strong>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dados &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="st">&quot;./data/titanic.txt&quot;</span>,
+                    <span class="dt">header =</span> <span class="ot">TRUE</span>,
+                    <span class="dt">sep =</span> <span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>)
+
+xt &lt;-<span class="st"> </span><span class="kw">addmargins</span>(<span class="kw">table</span>(dados), <span class="dv">4</span>, <span class="dt">FUN =</span> <span class="kw">list</span>(<span class="kw">list</span>(<span class="dt">Total =</span> sum)))
+pander::<span class="kw">pander</span>(<span class="kw">ftable</span>(xt),
+               <span class="dt">caption =</span> <span class="kw">paste</span>(<span class="st">&quot;Tabela de frequência dos&quot;</span>,
+                               <span class="st">&quot;passageiros do Titanic&quot;</span>),
+               <span class="dt">style =</span> <span class="st">&quot;rmarkdown&quot;</span>,
+               ## justify = c(rep(&quot;left&quot;, 4),
+               ##             rep(&quot;center&quot;, 2)),
+               <span class="dt">emphasize.strong.cells =</span> <span class="kw">rbind</span>(
+                   <span class="kw">cbind</span>(<span class="dv">1</span>, <span class="kw">c</span>(<span class="dv">4</span>, <span class="dv">7</span>)), <span class="kw">cbind</span>(<span class="dv">2</span>, <span class="dv">1</span>:<span class="dv">3</span>))
+               )</code></pre></div>
+<table style="width:99%;">
+<caption>Tabela de frequência dos passageiros do Titanic</caption>
+<colgroup>
+<col width="16%" />
+<col width="13%" />
+<col width="13%" />
+<col width="20%" />
+<col width="8%" />
+<col width="8%" />
+<col width="16%" />
+</colgroup>
+<tbody>
+<tr class="odd">
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"><strong>Survived</strong></td>
+<td align="center">No</td>
+<td align="center">Yes</td>
+<td align="center"><strong>Total</strong></td>
+</tr>
+<tr class="even">
+<td align="center"><strong>Class</strong></td>
+<td align="center"><strong>Sex</strong></td>
+<td align="center"><strong>Age</strong></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr class="odd">
+<td align="center">1st</td>
+<td align="center">Female</td>
+<td align="center">Adult</td>
+<td align="center"></td>
+<td align="center">4</td>
+<td align="center">140</td>
+<td align="center">144</td>
+</tr>
+<tr class="even">
+<td align="center"></td>
+<td align="center"></td>
+<td align="center">Child</td>
+<td align="center"></td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">1</td>
+</tr>
+<tr class="odd">
+<td align="center"></td>
+<td align="center">Male</td>
+<td align="center">Adult</td>
+<td align="center"></td>
+<td align="center">118</td>
+<td align="center">57</td>
+<td align="center">175</td>
+</tr>
+<tr class="even">
+<td align="center"></td>
+<td align="center"></td>
+<td align="center">Child</td>
+<td align="center"></td>
+<td align="center">0</td>
+<td align="center">5</td>
+<td align="center">5</td>
+</tr>
+<tr class="odd">
+<td align="center">2nd</td>
+<td align="center">Female</td>
+<td align="center">Adult</td>
+<td align="center"></td>
+<td align="center">13</td>
+<td align="center">80</td>
+<td align="center">93</td>
+</tr>
+<tr class="even">
+<td align="center"></td>
+<td align="center"></td>
+<td align="center">Child</td>
+<td align="center"></td>
+<td align="center">0</td>
+<td align="center">13</td>
+<td align="center">13</td>
+</tr>
+<tr class="odd">
+<td align="center"></td>
+<td align="center">Male</td>
+<td align="center">Adult</td>
+<td align="center"></td>
+<td align="center">154</td>
+<td align="center">14</td>
+<td align="center">168</td>
+</tr>
+<tr class="even">
+<td align="center"></td>
+<td align="center"></td>
+<td align="center">Child</td>
+<td align="center"></td>
+<td align="center">0</td>
+<td align="center">11</td>
+<td align="center">11</td>
+</tr>
+<tr class="odd">
+<td align="center">3rd</td>
+<td align="center">Female</td>
+<td align="center">Adult</td>
+<td align="center"></td>
+<td align="center">89</td>
+<td align="center">76</td>
+<td align="center">165</td>
+</tr>
+<tr class="even">
+<td align="center"></td>
+<td align="center"></td>
+<td align="center">Child</td>
+<td align="center"></td>
+<td align="center">17</td>
+<td align="center">14</td>
+<td align="center">31</td>
+</tr>
+<tr class="odd">
+<td align="center"></td>
+<td align="center">Male</td>
+<td align="center">Adult</td>
+<td align="center"></td>
+<td align="center">387</td>
+<td align="center">75</td>
+<td align="center">462</td>
+</tr>
+<tr class="even">
+<td align="center"></td>
+<td align="center"></td>
+<td align="center">Child</td>
+<td align="center"></td>
+<td align="center">35</td>
+<td align="center">13</td>
+<td align="center">48</td>
+</tr>
+<tr class="odd">
+<td align="center">Crew</td>
+<td align="center">Female</td>
+<td align="center">Adult</td>
+<td align="center"></td>
+<td align="center">3</td>
+<td align="center">20</td>
+<td align="center">23</td>
+</tr>
+<tr class="even">
+<td align="center"></td>
+<td align="center"></td>
+<td align="center">Child</td>
+<td align="center"></td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center"></td>
+<td align="center">Male</td>
+<td align="center">Adult</td>
+<td align="center"></td>
+<td align="center">670</td>
+<td align="center">192</td>
+<td align="center">862</td>
+</tr>
+<tr class="even">
+<td align="center"></td>
+<td align="center"></td>
+<td align="center">Child</td>
+<td align="center"></td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+</tbody>
+</table>
+<p>A análise gráfica descritiva do conjunto de dados é realizada na  onde exibe-se, acima, as frequências das categorias de cada variável presente no conjunto de dados e, abaixo, as proporções da tabela de contingência em cada combinação das variáveis dispostas em áreas retangulares. Primeiramente observa-se que a conjunto de dados não é balanceado em praticamente nenhuma variável, esse desbalanço é maais notável para a idade dos passageiros, onde observa-se que, aproximadamente, <code>paste0(round(prop.table(table(dados$Age))[1], 3)*100, &quot;%&quot;)</code> são passageiros adultos. Já no gráfico abaixo, nota-se que praticamente todas as mulheres da primeira classe sobreviveram e que houveram menos passageiros sobreviventes do sexo masculino. Preliminarmente, pode-se imaginar que todas as covariáveis observadas, com exceção de <strong><code>Age</code></strong>, podem ser utéis para a classificar se um passageiro é sobrivente ou não, ou ainda, calcular sua probabilidade de sobrevida em uma possível tragédia como essa.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">xys &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="dv">1</span>:<span class="kw">ncol</span>(dados), function(i) {
+    da &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="kw">table</span>(dados[, i]), <span class="dt">v =</span> <span class="kw">names</span>(dados)[i])
+    xy &lt;-<span class="st"> </span><span class="kw">barchart</span>(Freq ~<span class="st"> </span>Var1 |<span class="st"> </span>v,
+                   <span class="dt">data =</span> da,
+                   <span class="dt">horizontal =</span> <span class="ot">FALSE</span>,
+                   <span class="dt">scales =</span> <span class="kw">list</span>(
+                       <span class="dt">y =</span> <span class="kw">list</span>(<span class="dt">draw =</span> <span class="ot">FALSE</span>)
+                   ),
+                   <span class="dt">origin =</span> <span class="dv">0</span>,
+                   <span class="dt">ylab =</span> <span class="ot">NULL</span>,
+                   <span class="dt">panel =</span> function(x, y, ...) {
+                       <span class="kw">panel.barchart</span>(x, y, ...)
+                       <span class="kw">panel.text</span>(x, y -<span class="st"> </span><span class="kw">mean</span>(y) *<span class="st"> </span><span class="fl">0.07</span>, y)
+                   },
+                   <span class="dt">par.settings =</span> <span class="kw">list</span>(
+                       <span class="dt">layout.widths =</span> <span class="kw">list</span>(
+                           <span class="dt">left.padding =</span> <span class="dv">0</span>,
+                           <span class="dt">right.padding =</span> <span class="dv">0</span>
+                       )
+                   ))
+})
+
+## Gráficos de frequência
+gridExtra::<span class="kw">marrangeGrob</span>(xys, <span class="dt">ncol =</span> <span class="dv">4</span>, <span class="dt">nrow =</span> <span class="dv">1</span>, <span class="dt">top =</span> <span class="ot">NA</span>)</code></pre></div>
+<p><img src="lista2_files/figure-html/barchart-1.png" width="864" style="display: block; margin: auto;" /> </p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Gráficos de mosaico sequenciais
+## vcd::cotabplot(table(dados), layout = c(1, 4))
+vcd::<span class="kw">doubledecker</span>(<span class="kw">table</span>(dados), <span class="dt">data =</span> dados)</code></pre></div>
+<div class="figure" style="text-align: center">
+<img src="lista2_files/figure-html/mosaicplot-1.png" alt="Gráficos descritivos da base de dados. Frequências observadas em cada variável de Titanic (superior) e Representação da tabela de contingência de forma hierárquica (inferior)." width="864" />
+<p class="caption">
+Gráficos descritivos da base de dados. Frequências observadas em cada variável de Titanic (superior) e Representação da tabela de contingência de forma hierárquica (inferior).
+</p>
+</div>
+<p>Para dar sequência a obtenção de classificadores, será realiza a partição da base de dados em dois conjuntos. Um para ajuste do classificador e outro para validação deste. A partição será realizada a partir da função implementada para tal finalidade, os detalhes da implementação dessa função são exibidos no <a href="https://jreduardo.github.io/est171-ml">complemento online</a> do trabalho.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Particionando o conjunto de dados
+dasplit &lt;-<span class="st"> </span><span class="kw">mysplit</span>(dados, <span class="dt">percent =</span> <span class="kw">c</span>(<span class="fl">0.7</span>, <span class="fl">0.3</span>), <span class="dt">seed =</span> <span class="dv">1994</span>)
+
+## Número de observações em cada partição
+<span class="kw">sapply</span>(dasplit, nrow)</code></pre></div>
+<pre><code>## [1] 1541  660</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Atribuindo as partições em objetos de nome sujestivo
+da.train &lt;-<span class="st"> </span>dasplit[[<span class="dv">1</span>]]
+da.teste &lt;-<span class="st"> </span>dasplit[[<span class="dv">2</span>]]
+
+## Tranformando para inteiro, para utilização de alguns métodos
+X.train &lt;-<span class="st"> </span><span class="kw">sapply</span>(da.train, as.integer)
+X.teste &lt;-<span class="st"> </span><span class="kw">sapply</span>(da.teste, as.integer)</code></pre></div>
+<div id="regressao-logistica" class="section level3">
+<h3>Regressão Logística</h3>
+<p>O primeiro classificador a ser construído, será fundamentado sob a teoria dos modelos lineares generalizados. Associadoremos à variável resposta (<strong><code>Survived</code></strong>), condicional ao vetor de covariáveis (<strong><code>Class</code></strong>, <strong><code>Sex</code></strong> e <strong><code>Age</code></strong>), a distribuição Binomial de parâmetro <span class="math inline">\(\pi\)</span>, onde <span class="math inline">\(\pi\)</span> é função não linear (inversa da função logística) dos efeitos das covariáveis. A especificação do modelo é descrita abaixo. <span class="math display">\[
+\begin{gathered}
+    \text{Survived}_i \mid \text{Class}_i,\, \text{Sex}_i, \text{Age}_i
+    \sim \text{Binomial}(\pi_i)\\
+    \log \left ( \frac{\pi_i}{1 - \pi_i} \right ) =
+    \beta_0 +
+    \beta_{11} X_{2st,i} + \beta_{12} X_{3st,i} + \beta_{13} X_{Crew,i} +
+    \beta_2 X_{Male,i} + \beta_3 X_{Child,i}
+\end{gathered}
+\]</span></p>
+<p>em que <span class="math inline">\(i\)</span> representa as características do i-ésimo indivíduo, <span class="math inline">\(i=1, 2, \ldots, n\)</span>. <span class="math inline">\(\underline{\beta}\)</span> é o vetor dos parâmetros que representam os efeitos das covariáveis. E <span class="math inline">\(X_{j, i}\)</span> é uma variável binária que assume, para o i-ésimo indivíduo: 1 se a variável <strong><code>Class</code></strong> é igual a <span class="math inline">\(j\)</span> e 0 caso contrário, para <span class="math inline">\(j=2St,\,3St\,\text{e }Crew\)</span>; 1 se a variável <strong><code>Sex</code></strong> é igual a <span class="math inline">\(Male\)</span> e 0 caso contrário, para <span class="math inline">\(j=Male\)</span>; e 1 se a variável <strong><code>Age</code></strong> é igual a <span class="math inline">\(Child\)</span> e 0 caso contrário, para <span class="math inline">\(j=Child\)</span>.</p>
+<p>Ajustando esse modelo ao conjunto de treinamento, <code>da.train</code> têm-se os seguintes coeficientes estimados, com seu erro padrão calculado a partir da aproximação quadrática da versossimilhança e nível de significância do teste de Wald:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m0glm &lt;-<span class="st"> </span><span class="kw">glm</span>(Survived ~<span class="st"> </span>., <span class="dt">data =</span> da.train, <span class="dt">family =</span> <span class="st">&quot;binomial&quot;</span>)
+
+tabglm &lt;-<span class="st"> </span><span class="kw">summary</span>(m0glm)$coefficients
+ind &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">11</span>, <span class="dv">12</span>, <span class="dv">12</span>, <span class="dv">2</span>, <span class="dv">3</span>)
+<span class="kw">rownames</span>(tabglm) &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span class="st">&quot;$</span><span class="ch">\\</span><span class="st">beta_{&quot;</span>, ind, <span class="st">&quot;}$&quot;</span>)
+<span class="kw">colnames</span>(tabglm) &lt;-<span class="st"> </span><span class="kw">gsub</span>(<span class="st">&quot;</span><span class="ch">\\</span><span class="st">|&quot;</span>, <span class="st">&quot;</span><span class="ch">\\\\</span><span class="st">|&quot;</span>, <span class="kw">colnames</span>(tabglm))
+pander::<span class="kw">pander</span>(tabglm,
+               <span class="dt">caption =</span> <span class="kw">paste</span>(<span class="st">&quot;Coeficientes estimados e teste&quot;</span>,
+                               <span class="st">&quot;de Wald para o modelo Logístico&quot;</span>),
+               <span class="dt">justify =</span> <span class="kw">c</span>(<span class="st">&quot;left&quot;</span>, <span class="kw">rep</span>(<span class="st">&quot;center&quot;</span>, <span class="dv">4</span>)),
+               <span class="dt">style =</span> <span class="st">&quot;rmarkdown&quot;</span>)</code></pre></div>
+<table>
+<caption>Coeficientes estimados e teste de Wald para o modelo Logístico</caption>
+<thead>
+<tr class="header">
+<th align="left"> </th>
+<th align="center">Estimate</th>
+<th align="center">Std. Error</th>
+<th align="center">z value</th>
+<th align="center">Pr(&gt;|z|)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><strong><span class="math inline">\(\beta_{0}\)</span></strong></td>
+<td align="center">2.15</td>
+<td align="center">0.2057</td>
+<td align="center">10.45</td>
+<td align="center">1.43e-25</td>
+</tr>
+<tr class="even">
+<td align="left"><strong><span class="math inline">\(\beta_{11}\)</span></strong></td>
+<td align="center">-0.9756</td>
+<td align="center">0.2381</td>
+<td align="center">-4.098</td>
+<td align="center">4.175e-05</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong><span class="math inline">\(\beta_{12}\)</span></strong></td>
+<td align="center">-1.819</td>
+<td align="center">0.2102</td>
+<td align="center">-8.652</td>
+<td align="center">5.067e-18</td>
+</tr>
+<tr class="even">
+<td align="left"><strong><span class="math inline">\(\beta_{12}\)</span></strong></td>
+<td align="center">-0.7844</td>
+<td align="center">0.1891</td>
+<td align="center">-4.147</td>
+<td align="center">3.37e-05</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong><span class="math inline">\(\beta_{2}\)</span></strong></td>
+<td align="center">-2.57</td>
+<td align="center">0.1733</td>
+<td align="center">-14.83</td>
+<td align="center">9.324e-50</td>
+</tr>
+<tr class="even">
+<td align="left"><strong><span class="math inline">\(\beta_{3}\)</span></strong></td>
+<td align="center">1.053</td>
+<td align="center">0.2892</td>
+<td align="center">3.641</td>
+<td align="center">0.0002711</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">##-------------------------------------------
+## Risco estimado
+pglm &lt;-<span class="st"> </span><span class="kw">predict</span>(m0glm, <span class="dt">newdata =</span> da.teste, <span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)
+pred.glm50 &lt;-<span class="st"> </span><span class="kw">ifelse</span>(pglm &gt;=<span class="st"> </span><span class="fl">0.5</span>, <span class="st">&quot;Yes&quot;</span>, <span class="st">&quot;No&quot;</span>)
+errglm50 &lt;-<span class="st"> </span><span class="kw">sum</span>(da.teste[, <span class="dv">4</span>] !=<span class="st"> </span>pred.glm50)/<span class="kw">nrow</span>(da.teste)</code></pre></div>
+<p>Note que o modelo logístico conforme descrito não é essencialmente um classificador, pois é um modelo para a probabilidade. Utilizando dessa probabilidade predita pelo modelo logística para classificação fez-se a classificação da forma <span class="math inline">\(\hat{\pi_i} &gt; 0.5\)</span> classifica-se como sobrevivente (<strong><code>Survived</code></strong> = <code>Yes</code>) e não sobrevivente (<strong><code>Survived</code></strong> = <code>No</code>) caso contrário. Com essa regra de classificação obtêm-se a proporção de 0.2348485 classificações incorretas no conjunto de teste.</p>
+</div>
+<div id="regressao-linear" class="section level3">
+<h3>Regressão Linear</h3>
+<p>Similarmente à regressão logística este também é um modelo fundamentado na teoria dos modelos lineares generalizados, porém é definido no plano cartesiano, por assumir a distribuição Normal à variável de interesse condicionada as covariável, e sendo assim tem solução geométrica análitica (de mínimos quadrados). A regressão Gaussiana é o único modelo dessa classe com essa característica. O modelo é definido conforme especificação abaixo: <span class="math display">\[
+\begin{gathered}
+    \text{Survived}_i \mid \text{Class}_i,\, \text{Sex}_i, \text{Age}_i
+    \sim \text{Normal}(\mu_i, \sigma^2)\\
+    \mu_i =
+    \beta_0 +
+    \beta_{11} X_{2st,i} + \beta_{12} X_{3st,i} + \beta_{13} X_{Crew,i} +
+    \beta_2 X_{Male,i} + \beta_3 X_{Child,i}
+\end{gathered}
+\]</span></p>
+<p>em que <span class="math inline">\(i\)</span> representa as características do i-ésimo indivíduo, <span class="math inline">\(i=1, 2, \ldots, n\)</span>. <span class="math inline">\(\underline{\beta}\)</span> é o vetor dos parâmetros que representam os efeitos das covariáveis. E <span class="math inline">\(X_{j, i}\)</span> é uma variável binária que assume, para o i-ésimo indivíduo: 1 se a variável <strong><code>Class</code></strong> é igual a <span class="math inline">\(j\)</span> e 0 caso contrário, para <span class="math inline">\(j=2St,\,3St\,\text{e }Crew\)</span>; 1 se a variável <strong><code>Sex</code></strong> é igual a <span class="math inline">\(Male\)</span> e 0 caso contrário, para <span class="math inline">\(j=Male\)</span>; e 1 se a variável <strong><code>Age</code></strong> é igual a <span class="math inline">\(Child\)</span> e 0 caso contrário, para <span class="math inline">\(j=Child\)</span>.</p>
+<p>Note que claramente esse não seria um modelo adequado uma vez que o domínio da distribuição Normal são os reais e, sendo assim, pode haver predições negativas e maiores que 1 para a média <span class="math inline">\(\mu_i\)</span>. Isso é contemplado no modelo generalizado logístico, porém quando o interesse é somente predição, ambos são classificadores que devem ser avaliado, mesmo que a regressão linear tenha características inadequadas ao conjunto de dados.</p>
+<p>Com o modelo ajustado ao conjunto de dados de treino, exibe-se na Tabela 3 os coeficientes estimados juntamente com seu erro padrão e respectivo teste de Wald.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m0lm &lt;-<span class="st"> </span><span class="kw">lm</span>(<span class="kw">as.integer</span>(Survived) ~<span class="st"> </span>., <span class="dt">data =</span> da.train)
+
+tablm &lt;-<span class="st"> </span><span class="kw">summary</span>(m0lm)$coefficients
+<span class="kw">rownames</span>(tablm) &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span class="st">&quot;$</span><span class="ch">\\</span><span class="st">beta_{&quot;</span>, ind, <span class="st">&quot;}$&quot;</span>)
+<span class="kw">colnames</span>(tablm) &lt;-<span class="st"> </span><span class="kw">gsub</span>(<span class="st">&quot;</span><span class="ch">\\</span><span class="st">|&quot;</span>, <span class="st">&quot;</span><span class="ch">\\\\</span><span class="st">|&quot;</span>, <span class="kw">colnames</span>(tablm))
+pander::<span class="kw">pander</span>(tablm,
+               <span class="dt">caption =</span> <span class="kw">paste</span>(<span class="st">&quot;Coeficientes estimados e teste&quot;</span>,
+                               <span class="st">&quot;de Wald para o modelo Gaussiano&quot;</span>),
+               <span class="dt">justify =</span> <span class="kw">c</span>(<span class="st">&quot;left&quot;</span>, <span class="kw">rep</span>(<span class="st">&quot;center&quot;</span>, <span class="dv">4</span>)),
+               <span class="dt">style =</span> <span class="st">&quot;rmarkdown&quot;</span>)</code></pre></div>
+<table>
+<caption>Coeficientes estimados e teste de Wald para o modelo Gaussiano</caption>
+<thead>
+<tr class="header">
+<th align="left"> </th>
+<th align="center">Estimate</th>
+<th align="center">Std. Error</th>
+<th align="center">t value</th>
+<th align="center">Pr(&gt;|t|)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><strong><span class="math inline">\(\beta_{0}\)</span></strong></td>
+<td align="center">1.906</td>
+<td align="center">0.0306</td>
+<td align="center">62.28</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="left"><strong><span class="math inline">\(\beta_{11}\)</span></strong></td>
+<td align="center">-0.1728</td>
+<td align="center">0.03918</td>
+<td align="center">-4.41</td>
+<td align="center">1.103e-05</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong><span class="math inline">\(\beta_{12}\)</span></strong></td>
+<td align="center">-0.3034</td>
+<td align="center">0.03309</td>
+<td align="center">-9.17</td>
+<td align="center">1.476e-19</td>
+</tr>
+<tr class="even">
+<td align="left"><strong><span class="math inline">\(\beta_{12}\)</span></strong></td>
+<td align="center">-0.1592</td>
+<td align="center">0.03319</td>
+<td align="center">-4.797</td>
+<td align="center">1.769e-06</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong><span class="math inline">\(\beta_{2}\)</span></strong></td>
+<td align="center">-0.5149</td>
+<td align="center">0.02755</td>
+<td align="center">-18.69</td>
+<td align="center">2.142e-70</td>
+</tr>
+<tr class="even">
+<td align="left"><strong><span class="math inline">\(\beta_{3}\)</span></strong></td>
+<td align="center">0.1773</td>
+<td align="center">0.04749</td>
+<td align="center">3.734</td>
+<td align="center">0.0001956</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">##-------------------------------------------
+## Risco estimado
+plm &lt;-<span class="st"> </span><span class="kw">predict</span>(m0lm, <span class="dt">newdata =</span> da.teste) -<span class="st"> </span><span class="dv">1</span>
+pred.lm50 &lt;-<span class="st"> </span><span class="kw">ifelse</span>(plm &gt;=<span class="st"> </span><span class="fl">0.5</span>, <span class="st">&quot;Yes&quot;</span>, <span class="st">&quot;No&quot;</span>)
+errlm50 &lt;-<span class="st"> </span><span class="kw">sum</span>(da.teste[, <span class="dv">4</span>] !=<span class="st"> </span>pred.lm50)/<span class="kw">nrow</span>(da.teste)</code></pre></div>
+<p>Novamente, assim como realizado no modelo logístico, faremos a classificação a partir da probabilidade predita pelo modelo Gaussiano. Conforme discutido anterior essa predição de probabilidade tem diversas falhas, sendo a mais agravante não respeitar o espaço paramétrico (pode-se ter probabilidade maiores que 1 e menores que 0), porém utilizando a regra da classificação <span class="math inline">\(\hat{\mu_i} &gt; 0.5\)</span> classifica-se como sobrevivente (<strong><code>Survived</code></strong> = <code>Yes</code>) e não sobrevivente (<strong><code>Survived</code></strong> = <code>No</code>) caso contrário, temos uma proporção de classificações incorretas no conjunto de teste de 0.2348485.</p>
+</div>
+<div id="naive-bayes" class="section level3">
+<h3>Naive Bayes</h3>
+<p>Este é um classificador fundamentado a partir do teorema de bayes. Como o principal objetivo em classificação é estimar <span class="math inline">\(\Pr[Y=c \mid X]\, \forall\, c \in \mathbb{C}\)</span>, sendo <span class="math inline">\(\mathbb{C}\)</span> o conjunto de categorias da variável resposta, utilizando o Teorema de Bayes temos:</p>
+<p><span class="math display">\[
+\Pr(Y=c \mid x) =
+    \frac{f(\underline{x} \mid Y = c)\Pr(Y=c)}{\sum_{s \in \mathbb{C}}
+        f(\underline{x} \mid Y=s)\Pr(Y=s)}
+\]</span></p>
+<p>e assim calcula-se <span class="math inline">\(\Pr(Y=c \mid x)\)</span> estimando <span class="math inline">\(Pr(Y=c)\)</span>, comumente como proporções amostrais e <span class="math inline">\(f(\underline{x} \mid Y=c)\)</span>, onde o classificador Naive Bayes supõe independência condicional <span class="math display">\[
+f(\underline{x} \mid Y=c) = \prod_{j=1}^p f(x_j \mid Y=y)
+\]</span></p>
+<p>Para os dados do Titani todas as covariáveis são categóricas, portanto assume-se <span class="math inline">\(f(x_j \mid Y = c)\)</span> como uma distribuição Multinomial (ou Binomial no caso de duas categorias), assim têm-se 16 probabilidades a serem calculadas conforme exibe-se na Tabela 4.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m0naive &lt;-<span class="st"> </span><span class="kw">naiveBayes</span>(Survived ~., <span class="dt">data =</span> da.train)
+
+tabnaive &lt;-<span class="st"> </span><span class="kw">do.call</span>(cbind, m0naive$tables)
+## vars &lt;- c(rep(&quot;Class&quot;, 4), rep(&quot;Sex&quot;, 2), rep(&quot;Age&quot;, 2))
+## cnam &lt;- paste0(&quot;$X_{&quot;, vars, &quot;} = &quot;, colnames(tabnaive), &quot;$&quot;)
+## colnames(tabnaive) &lt;- cnam
+pander::<span class="kw">pander</span>(tabnaive,
+               <span class="dt">caption =</span> <span class="kw">paste</span>(<span class="st">&quot;Probabilidades estimadas para cada&quot;</span>,
+                               <span class="st">&quot;categoria de cada covariável&quot;</span>,
+                               <span class="st">&quot;condicional a Survived&quot;</span>),
+               ## justify = c(&quot;left&quot;, rep(&quot;center&quot;, 4)),
+               <span class="dt">digits =</span> <span class="dv">3</span>,
+               <span class="dt">style =</span> <span class="st">&quot;rmarkdown&quot;</span>)</code></pre></div>
+<table style="width:107%;">
+<caption>Probabilidades estimadas para cada categoria de cada covariável condicional a Survived</caption>
+<colgroup>
+<col width="13%" />
+<col width="12%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+<col width="12%" />
+<col width="11%" />
+<col width="11%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center"> </th>
+<th align="center">1st</th>
+<th align="center">2nd</th>
+<th align="center">3rd</th>
+<th align="center">Crew</th>
+<th align="center">Female</th>
+<th align="center">Male</th>
+<th align="center">Adult</th>
+<th align="center">Child</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center"><strong>No</strong></td>
+<td align="center">0.0822</td>
+<td align="center">0.107</td>
+<td align="center">0.346</td>
+<td align="center">0.464</td>
+<td align="center">0.0783</td>
+<td align="center">0.922</td>
+<td align="center">0.964</td>
+<td align="center">0.0358</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>Yes</strong></td>
+<td align="center">0.284</td>
+<td align="center">0.174</td>
+<td align="center">0.237</td>
+<td align="center">0.306</td>
+<td align="center">0.493</td>
+<td align="center">0.507</td>
+<td align="center">0.913</td>
+<td align="center">0.0868</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">##-------------------------------------------
+## Risco estimado
+pnaive &lt;-<span class="st"> </span><span class="kw">predict</span>(m0naive, <span class="dt">newdata =</span> da.teste, <span class="dt">type =</span> <span class="st">&quot;raw&quot;</span>)[, <span class="dv">2</span>]
+pred.naive50 &lt;-<span class="st"> </span><span class="kw">ifelse</span>(pnaive &gt;=<span class="st"> </span><span class="fl">0.5</span>, <span class="st">&quot;Yes&quot;</span>, <span class="st">&quot;No&quot;</span>)
+errnaive50 &lt;-<span class="st"> </span><span class="kw">sum</span>(da.teste[, <span class="dv">4</span>] !=<span class="st"> </span>pred.naive50)/<span class="kw">nrow</span>(da.teste)</code></pre></div>
+<p>Com a regra da classificação <span class="math inline">\(\hat{\Pr}(\)</span><strong><code>Survived</code></strong>=<code>Yes</code><span class="math inline">\(\mid \underline{x}^t_i) &gt; 0.5\)</span> classificado como sobrevivente (<strong><code>Survived</code></strong> = <code>Yes</code>) e não sobrevivente (<strong><code>Survived</code></strong> = <code>No</code>) caso contrário, temos uma proporção de classificações incorretas no conjunto de teste de 0.230303.</p>
+</div>
+<div id="analise-discriminante-linear" class="section level3">
+<h3>Análise Discriminante Linear</h3>
+<p>Em análise discriminante linear de Fisher, ainda utiliza-se o teorema de Bayes da mesma forma como descrito na seção <a href="#naive-bayes">Naive Bayes</a>, porém assume-se para <span class="math inline">\(f(\underline{x} \mid Y=c)\)</span> a distribuição Normal multivariada de parâmetros <span class="math inline">\(\underline{\mu_c}\)</span> e matriz de variâncias e covariâncias <span class="math inline">\(\Sigma\)</span> comum para a toda categoria <span class="math inline">\(c \in \mathbb{C}\)</span></p>
+<p>Perceba-se que aparentemente essa abordagem não parece satisfatória uma vez que todo o conjunto de covariáveis é categórica, assim estamos assumindo uma distribuição Normal para algo que é claramente discreto. Todavia como já discutido na seção <a href="#regresao-linear">Regressão Linear</a> o interesse é apenas preditivo, e sendo assim, podemos construir uma regra de classificação que será posteriormente avaliada. O classificador ajustado ao conjunto de treinamento é exibido abaixo.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m0lda &lt;-<span class="st"> </span><span class="kw">lda</span>(Survived ~<span class="st"> </span>., <span class="dt">data =</span> da.train)
+m0lda</code></pre></div>
+<pre><code>## Call:
+## lda(Survived ~ ., data = da.train)
+## 
+## Prior probabilities of groups:
+##        No       Yes 
+## 0.6709929 0.3290071 
+## 
+## Group means:
+##      Class2nd  Class3rd ClassCrew   SexMale   AgeChild
+## No  0.1073501 0.3462282 0.4642166 0.9216634 0.03578337
+## Yes 0.1735700 0.2366864 0.3057199 0.5069034 0.08678501
+## 
+## Coefficients of linear discriminants:
+##                  LD1
+## Class2nd  -0.8283529
+## Class3rd  -1.4542324
+## ClassCrew -0.7630442
+## SexMale   -2.4677185
+## AgeChild   0.8498164</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">##-------------------------------------------
+## Risco estimado
+plda &lt;-<span class="st"> </span><span class="kw">predict</span>(m0lda, <span class="dt">newdata =</span> da.teste[, -<span class="dv">4</span>])[[<span class="st">&quot;posterior&quot;</span>]][, <span class="dv">2</span>]
+pred.lda50 &lt;-<span class="st"> </span><span class="kw">ifelse</span>(plda &gt;=<span class="st"> </span><span class="fl">0.5</span>, <span class="st">&quot;Yes&quot;</span>, <span class="st">&quot;No&quot;</span>)
+errlda50 &lt;-<span class="st"> </span><span class="kw">sum</span>(da.teste[, <span class="dv">4</span>] !=<span class="st"> </span>pred.lda50)/<span class="kw">nrow</span>(da.teste)</code></pre></div>
+<p>Com a regra da classificação <span class="math inline">\(\hat{\Pr}(\)</span><strong><code>Survived</code></strong>=<code>Yes</code><span class="math inline">\(\mid \underline{x}^t_i) &gt; 0.5\)</span> classificado como sobrevivente (<strong><code>Survived</code></strong> = <code>Yes</code>) e não sobrevivente (<strong><code>Survived</code></strong> = <code>No</code>) caso contrário, temos uma proporção de classificações incorretas no conjunto de teste de 0.2348485.</p>
+</div>
+<div id="analise-discriminante-quadratica" class="section level3">
+<h3>Análise Discriminante Quadrática</h3>
+<p>A análise discriminante quadrática de Fisher segue o mesmo princípio da análise discriminante linear, porém flexibiliza <span class="math inline">\(f(\underline{x} \mid Y=c)\)</span> estimando uma matriz de variâncias e covariâncias <span class="math inline">\(Sigma\)</span> para cada classe <span class="math inline">\(c \in \mathbb{C}\)</span>, ou seja, nessa abordagem assume-se que <span class="math display">\[
+[\underline{x} \mid Y=c] \sim \text{Normal}(\mu_c, \Sigma_c) \quad
+    \forall \, c \in \mathbb{C}
+\]</span></p>
+<p>Novamente as mesmas considerações feitas na abordagem via análise discriminante linear se aplicam. O resultado do classificador ajustado aos dados de treino é exibido abaixo</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m0qda &lt;-<span class="st"> </span><span class="kw">qda</span>(Survived ~<span class="st"> </span>., <span class="dt">data =</span> da.train)
+m0qda</code></pre></div>
+<pre><code>## Call:
+## qda(Survived ~ ., data = da.train)
+## 
+## Prior probabilities of groups:
+##        No       Yes 
+## 0.6709929 0.3290071 
+## 
+## Group means:
+##      Class2nd  Class3rd ClassCrew   SexMale   AgeChild
+## No  0.1073501 0.3462282 0.4642166 0.9216634 0.03578337
+## Yes 0.1735700 0.2366864 0.3057199 0.5069034 0.08678501</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">##-------------------------------------------
+## Risco estimado
+pqda &lt;-<span class="st"> </span><span class="kw">predict</span>(m0qda, <span class="dt">newdata =</span> da.teste[, -<span class="dv">4</span>])[[<span class="st">&quot;posterior&quot;</span>]][, <span class="dv">2</span>]
+pred.qda50 &lt;-<span class="st"> </span><span class="kw">ifelse</span>(pqda &gt;=<span class="st"> </span><span class="fl">0.5</span>, <span class="st">&quot;Yes&quot;</span>, <span class="st">&quot;No&quot;</span>)
+errqda50 &lt;-<span class="st"> </span><span class="kw">sum</span>(da.teste[, <span class="dv">4</span>] !=<span class="st"> </span>pred.qda50)/<span class="kw">nrow</span>(da.teste)</code></pre></div>
+<p>Analógo com o classificador construído a partir da análise discriminante linear. Utilizamos a regra da classificação <span class="math inline">\(\hat{\Pr}(\)</span><strong><code>Survived</code></strong>=<code>Yes</code><span class="math inline">\(\mid \underline{x}^t_i) &gt; 0.5\)</span> classificado como sobrevivente (<strong><code>Survived</code></strong> = <code>Yes</code>) e não sobrevivente (<strong><code>Survived</code></strong> = <code>No</code>) caso contrário, temos uma proporção de classificações incorretas no conjunto de teste de 0.2681818.</p>
+</div>
+<div id="k-nn-k-nearest-neighbor" class="section level3">
+<h3>K-NN: k-Nearest Neighbor</h3>
+<p>Este método se diferencia dos demais por ser totalmente não paramétrico, não há suposição de distribuição ou quaisquer parâmetros a ser estimados. O método se baseia em classificar ou predizer os valores da variável de interesse a partir dos valores de seus <code>k</code> vizinhos, no caso de classificação, classifica-se uma nova observação como a moda das <code>k</code> observações mais próximos e no caso de predição (considerar uma variável resposta não categórica) prediz-se com base na média. A proximidade é dada por distâncias euclidianas e o valor de quantas observações devem ser usadas para classificação ou predição, <code>k</code>, é realizada separando 20% da base de treino para validação.</p>
+<p>Nesse trabalho utiliza-se ainda, o algoritmo <code>ANN</code> (<em>Approximate Nearest Neighbor Searching</em>), proposto em 1993 por Arya S. and Mount D.M. para aplicação do KNN em problemas de alta dimensão onde os algoritmos convencionais para cálculo de distância são ineficientes. Esse algoritmo é implementado em <code>C++</code> e está disponível em R no pacote <code>FNN</code> (via argumento <code>algorithm = &quot;kd_tree&quot;</code>, nas funções do pacote)<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>. Utilizou-se deste algoritmo para escolhe do melhor <code>k</code> via validação cruzada.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Separa a parte do treino para validação
+train.split &lt;-<span class="st"> </span><span class="kw">mysplit</span>(da.train, <span class="dt">percent =</span> <span class="kw">c</span>(<span class="fl">0.8</span>, <span class="fl">0.2</span>), <span class="dt">seed =</span> <span class="dv">1994</span>)
+
+## Organiza em data.frame e transforma para valores inteiros
+da.train2 &lt;-<span class="st"> </span>train.split[[<span class="dv">1</span>]]
+da.valid &lt;-<span class="st"> </span>train.split[[<span class="dv">2</span>]]
+X.train2 &lt;-<span class="st"> </span><span class="kw">sapply</span>(da.train2, as.integer)
+X.valid &lt;-<span class="st"> </span><span class="kw">sapply</span>(da.valid, as.integer)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Parte bem demorada, pois faz-se para todos os k&#39;s, embora fosse
+## necessário apenas para alguns...
+kseq &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">1</span>, <span class="kw">nrow</span>(X.train2), <span class="dt">by =</span> <span class="dv">2</span>)
+errs &lt;-<span class="st"> </span><span class="kw">sapply</span>(kseq, function(k) {
+    m0 &lt;-<span class="st"> </span>FNN::<span class="kw">knn</span>(<span class="dt">train =</span> X.train2[, -<span class="dv">4</span>], <span class="dt">test =</span> X.valid[, -<span class="dv">4</span>],
+                   <span class="dt">cl =</span> X.train2[, <span class="dv">4</span>], <span class="dt">k =</span> k, <span class="dt">algorithm =</span> <span class="st">&quot;kd_tree&quot;</span>)
+    <span class="kw">sum</span>(X.valid[, <span class="dv">4</span>] !=<span class="st"> </span>m0)/<span class="kw">nrow</span>(X.valid)
+})</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Exibe graficamente
+da &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">k =</span> kseq, <span class="dt">R =</span> errs)
+
+xy1 &lt;-<span class="st"> </span><span class="kw">xyplot</span>(R ~<span class="st"> </span>k,
+              <span class="dt">type =</span> <span class="st">&quot;S&quot;</span>,
+              <span class="dt">data =</span> da,
+              <span class="dt">ylab =</span> <span class="kw">expression</span>(<span class="kw">hat</span>(R)),
+              <span class="dt">panel =</span> function(x, y, subscripts, ...) {
+                  <span class="kw">panel.grid</span>()
+                  <span class="kw">panel.xyplot</span>(x, y, ...)
+                  <span class="kw">panel.abline</span>(<span class="dt">h =</span> <span class="kw">min</span>(y, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>),
+                               <span class="dt">v =</span> x[<span class="kw">which.min</span>(y)],
+                               <span class="dt">lty =</span> <span class="dv">2</span>)
+              })
+
+## Exibe apenas os 8 k&#39;s mais próximos (acima e abaixo) do mínimo
+k.min &lt;-<span class="st"> </span>kseq[<span class="kw">which.min</span>(errs)]
+index &lt;-<span class="st"> </span><span class="kw">c</span>(-<span class="dv">10</span>:<span class="dv">10</span>) +<span class="st"> </span><span class="kw">which.min</span>(errs)
+index &lt;-<span class="st"> </span>index[index &gt;<span class="st"> </span><span class="dv">0</span>]
+
+xy2 &lt;-<span class="st"> </span><span class="kw">xyplot</span>(R ~<span class="st"> </span>k,
+              <span class="dt">type =</span> <span class="kw">c</span>(<span class="st">&quot;S&quot;</span>, <span class="st">&quot;p&quot;</span>),
+              <span class="dt">pch =</span> <span class="dv">19</span>,
+              <span class="dt">data =</span> da[index, ],
+              <span class="dt">ylab =</span> <span class="kw">expression</span>(<span class="kw">hat</span>(R)),
+              <span class="dt">panel =</span> function(x, y, subscripts, ...) {
+                  <span class="kw">panel.grid</span>()
+                  <span class="kw">panel.xyplot</span>(x, y, ...)
+                  <span class="kw">panel.abline</span>(<span class="dt">h =</span> <span class="kw">min</span>(y, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>),
+                               <span class="dt">v =</span> x[<span class="kw">which.min</span>(y)],
+                               <span class="dt">lty =</span> <span class="dv">2</span>)
+              })
+
+<span class="kw">print</span>(xy1, <span class="dt">split =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>), <span class="dt">more =</span> <span class="ot">TRUE</span>)
+<span class="kw">print</span>(xy2, <span class="dt">split =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>), <span class="dt">more =</span> <span class="ot">FALSE</span>)</code></pre></div>
+<div class="figure" style="text-align: center">
+<img src="lista2_files/figure-html/plotcvknn-1.png" alt="Proporção de classificações incorretas pelo classificador KNN com diferentes k's. Todos os possíveis k's ímpares (esquerda) e apenas os k's próximos do k ótimo." width="864" />
+<p class="caption">
+Proporção de classificações incorretas pelo classificador KNN com diferentes k’s. Todos os possíveis k’s ímpares (esquerda) e apenas os k’s próximos do k ótimo.
+</p>
+</div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Ajusta o classificador com base no k ótimo
+m0knn &lt;-<span class="st"> </span>class::<span class="kw">knn</span>(<span class="dt">train =</span> X.train[, -<span class="dv">4</span>], <span class="dt">test =</span> X.teste[, -<span class="dv">4</span>],
+                    <span class="dt">cl =</span> da.train[, <span class="dv">4</span>], <span class="dt">k =</span> k.min, <span class="dt">prob =</span> <span class="ot">TRUE</span>)
+
+##-------------------------------------------
+## Risco estimado
+pknn &lt;-<span class="st"> </span><span class="kw">ifelse</span>(m0knn ==<span class="st"> &quot;Yes&quot;</span>, <span class="kw">attr</span>(m0knn, <span class="st">&quot;prob&quot;</span>),
+               <span class="dv">1</span> -<span class="st"> </span><span class="kw">attr</span>(m0knn, <span class="st">&quot;prob&quot;</span>))
+pred.knn50 &lt;-<span class="st"> </span><span class="kw">ifelse</span>(pknn &gt;=<span class="st"> </span><span class="fl">0.5</span>, <span class="st">&quot;Yes&quot;</span>, <span class="st">&quot;No&quot;</span>)
+errknn50 &lt;-<span class="st"> </span><span class="kw">sum</span>(da.teste[, <span class="dv">4</span>] !=<span class="st"> </span>pred.knn50)/<span class="kw">nrow</span>(da.teste)</code></pre></div>
+<p>Na  utilizamos o método considerando diferente número de vizinhos, <code>k</code>, para determinar o <code>k</code> definitivo a ser utilizado para classificação. Na figura são exibidos a proporção de classificações incorretas denotada por <span class="math inline">\(\hat{R}\)</span> no eixo das ordenadas. O número de vizinhos que proporcionou a menor proporção de classificações incorretas foi de 33 vizinhos, com uma proporção de 0.2287879.</p>
+</div>
+<div id="comparacao-dos-metodos" class="section level3">
+<h3>Comparação dos métodos</h3>
+<p>Para comparação dos métodos será utilizado, além da proporção de classificações incorretas as medidas de sensibilidade e especificadade calculadas a partir da matriz de confusão obtida por cada classificador.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Lista de probabilidades estimadas com base nos modelos de
+## classificação vistos anteriormente
+lista &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="st">&quot;GLM&quot;</span> =<span class="st"> </span>pglm, <span class="st">&quot;LM&quot;</span> =<span class="st"> </span>plm, <span class="st">&quot;NB&quot;</span> =<span class="st"> </span>pnaive,
+              <span class="st">&quot;LDA&quot;</span> =<span class="st"> </span>plda, <span class="st">&quot;QDA&quot;</span> =<span class="st"> </span>pqda, <span class="st">&quot;KNN&quot;</span> =<span class="st"> </span>pknn)
+
+## Tabela de comparação com calculo de escore que dá mais importância
+## para taxa de acertos do que para sens e espe
+compare &lt;-<span class="st"> </span><span class="kw">sapply</span>(lista, confmeds, <span class="dt">teste =</span> da.teste[, <span class="dv">4</span>], <span class="dt">corte =</span> <span class="fl">0.5</span>)
+escore &lt;-<span class="st"> </span><span class="kw">apply</span>(compare, <span class="dv">2</span>, function(x) (<span class="dv">2</span> *<span class="st"> </span>x[<span class="dv">1</span>] +<span class="st"> </span>x[<span class="dv">2</span>] +<span class="st"> </span>x[<span class="dv">3</span>]) /<span class="st"> </span><span class="dv">4</span>)
+
+## Exibindo em formato de tabela
+compare &lt;-<span class="st"> </span><span class="kw">rbind</span>(compare, escore)
+<span class="kw">rownames</span>(compare) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Prop. de Acertos&quot;</span>,
+                       <span class="st">&quot;Sensibilidade&quot;</span>,
+                       <span class="st">&quot;Especificidade&quot;</span>,
+                       <span class="st">&quot;Escore&quot;</span>)
+pander::<span class="kw">pander</span>(compare,
+               <span class="dt">caption =</span> <span class="kw">paste</span>(<span class="st">&quot;Comparação dos métodos utilizando o&quot;</span>,
+                               <span class="st">&quot;ponto de corte usual de 0.5&quot;</span>),
+               <span class="dt">justify =</span> <span class="kw">c</span>(<span class="st">&quot;left&quot;</span>, <span class="kw">rep</span>(<span class="st">&quot;center&quot;</span>, <span class="dv">6</span>)),
+               <span class="dt">digits =</span> <span class="dv">4</span>,
+               <span class="dt">style =</span> <span class="st">&quot;rmarkdown&quot;</span>)</code></pre></div>
+<table style="width:107%;">
+<caption>Comparação dos métodos utilizando o ponto de corte usual de 0.5</caption>
+<colgroup>
+<col width="31%" />
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left"> </th>
+<th align="center">GLM</th>
+<th align="center">LM</th>
+<th align="center">NB</th>
+<th align="center">LDA</th>
+<th align="center">QDA</th>
+<th align="center">KNN</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><strong>Prop. de Acertos</strong></td>
+<td align="center">0.7652</td>
+<td align="center">0.7652</td>
+<td align="center">0.7697</td>
+<td align="center">0.7652</td>
+<td align="center">0.7318</td>
+<td align="center">0.7712</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Sensibilidade</strong></td>
+<td align="center">0.4608</td>
+<td align="center">0.4608</td>
+<td align="center">0.4755</td>
+<td align="center">0.4608</td>
+<td align="center">0.5882</td>
+<td align="center">0.2941</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Especificidade</strong></td>
+<td align="center">0.9013</td>
+<td align="center">0.9013</td>
+<td align="center">0.9013</td>
+<td align="center">0.9013</td>
+<td align="center">0.7961</td>
+<td align="center">0.9846</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Escore</strong></td>
+<td align="center">0.7231</td>
+<td align="center">0.7231</td>
+<td align="center">0.729</td>
+<td align="center">0.7231</td>
+<td align="center">0.712</td>
+<td align="center">0.7053</td>
+</tr>
+</tbody>
+</table>
+<p>Na Tabela 5 são exibidas as medidas para comparação dos classificadores com base na probabilidade de corte de 0.5. Todos os métodos apresentados neste trabalho contém alguma medida que pode ser interpretada como uma estimativa da probabilidade. O modelo logístico é naturalmente um modelo para prever a probabilidade, o Gaussiano ainda que não respeite o espaço paramétrico da probabilidade a estima, o Naive Bayes assim como as análises discriminantes de Fisher utilizam do teorema de Bayes para estimar probabilidades e no K-NN podemos estimar essa probabilidade como a proporção dos k vizinos mais próximos em certa categoria.</p>
+<p>As avaliações até agora, foram realizadas com o classificador obtidos considerando o ponto de corte 0.5, nas probabilidades estimadas. Todavia pode-se encontrar o ponto de corte ótimo para cada método considerando um conjunto de validação. Ilustramos os resultados desse procedimento a seguir.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Atualiza os modelos considerando somente o conjunto de treinamento
+## reduzido da base de validação
+m1glm   &lt;-<span class="st"> </span><span class="kw">update</span>(m0glm, <span class="dt">data =</span> da.train2)
+m1lm    &lt;-<span class="st"> </span><span class="kw">update</span>(m0lm, <span class="dt">data =</span> da.train2)
+m1lda   &lt;-<span class="st"> </span><span class="kw">update</span>(m0lda, <span class="dt">data =</span> da.train2)
+m1qda   &lt;-<span class="st"> </span><span class="kw">update</span>(m0qda, <span class="dt">data =</span> da.train2)
+m1naive &lt;-<span class="st"> </span><span class="kw">naiveBayes</span>(Survived ~., <span class="dt">data =</span> da.train2)
+m1knn   &lt;-<span class="st"> </span>class::<span class="kw">knn</span>(<span class="dt">train =</span> X.train2[, -<span class="dv">4</span>], <span class="dt">test =</span> X.valid[, -<span class="dv">4</span>],
+                      <span class="dt">cl =</span> da.train2[, <span class="dv">4</span>], <span class="dt">k =</span> k.min, <span class="dt">prob =</span> <span class="ot">TRUE</span>)
+
+## Calcula as probabilidades
+listacv &lt;-<span class="st"> </span><span class="kw">list</span>(
+    <span class="dt">prglm   =</span> <span class="kw">predict</span>(m1glm, <span class="dt">newd =</span> da.valid, <span class="dt">type =</span> <span class="st">&quot;response&quot;</span>),
+    <span class="dt">prlm    =</span> <span class="kw">predict</span>(m1lm, <span class="dt">newd =</span> da.valid) -<span class="st"> </span><span class="dv">1</span> ,
+    <span class="dt">prlda   =</span> <span class="kw">predict</span>(m1lda, <span class="dt">newd =</span> da.valid[, -<span class="dv">4</span>])[[<span class="st">&quot;posterior&quot;</span>]][, <span class="dv">2</span>],
+    <span class="dt">prqda   =</span> <span class="kw">predict</span>(m1qda, <span class="dt">newd =</span> da.valid[, -<span class="dv">4</span>])[[<span class="st">&quot;posterior&quot;</span>]][, <span class="dv">2</span>],
+    <span class="dt">prnaive =</span> <span class="kw">predict</span>(m1naive, <span class="dt">newd =</span> da.valid, <span class="dt">type =</span> <span class="st">&quot;raw&quot;</span>)[, <span class="dv">2</span>],
+    <span class="dt">prknn   =</span> <span class="kw">ifelse</span>(m1knn ==<span class="st"> &quot;Yes&quot;</span>, <span class="kw">attr</span>(m1knn, <span class="st">&quot;prob&quot;</span>),
+                     <span class="dv">1</span> -<span class="st"> </span><span class="kw">attr</span>(m0knn, <span class="st">&quot;prob&quot;</span>))
+)
+
+## Calcula as medidas resumo da matriz de confusao para cada
+## classificador em cada ponto de corte definido por pseq
+pseq &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="dt">by =</span> <span class="fl">0.01</span>)
+rocs &lt;-<span class="st"> </span><span class="kw">lapply</span>(listacv, function(p) {
+    <span class="kw">ROC</span>(<span class="dt">test =</span> p, <span class="dt">stat =</span> da.valid[, <span class="dv">4</span>])
+    ## meds &lt;- do.call(
+    ##     rbind, lapply(pseq, confmeds, prob = p, teste = da.valid[, 4]))
+    ## as.data.frame(meds)
+})</code></pre></div>
+<p>Na  apresentam-se as curvas ROC para todos os classificadores, essas foram contruídas a partir dos classificadores ajustados ao conjunto de treino, removendo 20% dele para validação cruzada, ou seja, os resultados exibidos são com base na classificação de 20% do conjunto de treinamento (308 observações). A partir deste da avaliação da curva ROC indentificou-se os pontos de corte que maximizam a soma entre sensibilidade e especificidade do classificador. Além disso pode-se notar também as semelhanças e características deles.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Organiza em data.frame
+da &lt;-<span class="st"> </span>plyr::<span class="kw">ldply</span>(<span class="kw">lapply</span>(rocs, function(x) {
+    da &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">sens =</span> x$res[, <span class="st">&quot;sens&quot;</span>],
+                     <span class="dt">espe =</span> x$res[, <span class="st">&quot;spec&quot;</span>],
+                     <span class="dt">auc =</span> x$AUC)
+    da$pcor &lt;-<span class="st"> </span>x$res[<span class="kw">which.max</span>(<span class="kw">with</span>(da, sens +<span class="st"> </span>espe)), <span class="dv">5</span>]
+    da
+}), <span class="dt">.id =</span> <span class="st">&quot;Model&quot;</span>)
+
+fl &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Generalized Linear Model&quot;</span>,
+        <span class="st">&quot;Linear Model&quot;</span>,
+        <span class="st">&quot;Naive bayes&quot;</span>,
+        <span class="st">&quot;Linear Discriminant&quot;</span>,
+        <span class="st">&quot;Quadratic Discriminant&quot;</span>,
+        <span class="st">&quot;K-Nearest Neighbor&quot;</span>)
+
+<span class="kw">xyplot</span>(sens ~<span class="st"> </span><span class="dv">1</span>-espe |<span class="st"> </span>Model,
+       <span class="dt">data =</span> da,
+       <span class="dt">layout =</span> <span class="kw">c</span>(<span class="ot">NA</span>, <span class="dv">2</span>),
+       <span class="dt">as.table =</span> <span class="ot">TRUE</span>,
+       <span class="dt">type =</span> <span class="kw">c</span>(<span class="st">&quot;l&quot;</span>, <span class="st">&quot;g&quot;</span>),
+       <span class="dt">lwd =</span> <span class="dv">2</span>,
+       <span class="dt">xlab =</span> <span class="st">&quot;1 - Especificidade&quot;</span>,
+       <span class="dt">ylab =</span> <span class="st">&quot;Sensibilidade&quot;</span>,
+       <span class="dt">strip =</span> <span class="kw">strip.custom</span>(<span class="dt">factor.levels =</span> fl),
+       <span class="dt">panel =</span> function(x, y, subscripts, ...) {
+           index &lt;-<span class="st"> </span><span class="kw">which.max</span>(<span class="dv">1</span> +<span class="st"> </span>y -<span class="st"> </span>x)
+           texto &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="st">&quot;Ponto de corte:</span><span class="ch">\n</span><span class="st">&quot;</span>,
+                          <span class="kw">round</span>(da$pcor[subscripts], <span class="dv">4</span>))
+           texto2 &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="st">&quot;Área abaixo da curva: &quot;</span>,
+                           <span class="kw">round</span>(da$auc[subscripts], <span class="dv">4</span>))
+           <span class="kw">panel.xyplot</span>(x, y, ...)
+           <span class="kw">panel.text</span>(x[index], y[index] +<span class="st"> </span><span class="fl">0.15</span>, texto, <span class="dt">cex =</span> <span class="fl">0.8</span>)
+           <span class="kw">panel.points</span>(x[index], y[index], <span class="dt">pch =</span> <span class="dv">3</span>, <span class="dt">lwd =</span> <span class="dv">3</span>)
+           <span class="kw">panel.text</span>(<span class="fl">0.5</span>, <span class="fl">0.01</span>, texto2, <span class="dt">cex =</span> <span class="fl">0.8</span>)
+           <span class="kw">panel.abline</span>(<span class="dt">a =</span> <span class="dv">0</span>, <span class="dt">b =</span> <span class="dv">1</span>, <span class="dt">col =</span> <span class="st">&quot;gray70&quot;</span>, <span class="dt">lty =</span> <span class="dv">2</span>)
+       })</code></pre></div>
+<div class="figure" style="text-align: center">
+<img src="lista2_files/figure-html/plotroc-1.png" alt="Curvas ROC (Receiver Operating Characteristic) para cada modelo de classificação com indicação do melhor ponto de corte e respectivo AUC (Area Under Curve) para o conjunto de validação." width="864" />
+<p class="caption">
+Curvas ROC (Receiver Operating Characteristic) para cada modelo de classificação com indicação do melhor ponto de corte e respectivo AUC (Area Under Curve) para o conjunto de validação.
+</p>
+</div>
+<p>Contruindo a regra de classificação a partir dos pontos de cortes ótimos exibidos na  temos na Tabela 6 os resumos da matriz de confusão, quando classificadas as 660 observações do conjunto de teste.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Tabela de comparação com calculo de escore que dá mais importância
+## para taxa de acertos do que para sens e espe
+cortes &lt;-<span class="st"> </span><span class="kw">with</span>(da, <span class="kw">tapply</span>(pcor, Model, unique))
+compare &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="dv">1</span>:<span class="kw">length</span>(cortes), function(i) {
+    <span class="kw">confmeds</span>(lista[[i]], <span class="dt">teste =</span> da.teste[, <span class="dv">4</span>], <span class="dt">corte =</span> cortes[i])
+})
+## escore &lt;- apply(compare, 2, function(x) (2 * x[1] + x[2] + x[3]) / 4)
+
+## Exibindo em formato de tabela
+<span class="kw">rownames</span>(compare) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Prop. de Acertos&quot;</span>,
+                       <span class="st">&quot;Sensibilidade&quot;</span>,
+                       <span class="st">&quot;Especificidade&quot;</span>)
+<span class="kw">colnames</span>(compare) &lt;-<span class="st"> </span><span class="kw">names</span>(lista)
+pander::<span class="kw">pander</span>(compare,
+               <span class="dt">caption =</span> <span class="kw">paste</span>(
+                   <span class="st">&quot;Comparação dos métodos via resumos da matriz&quot;</span>,
+                   <span class="st">&quot;de confusão da classificação vs. teste,&quot;</span>,
+                   <span class="st">&quot;utilizando o ponto de corte ótimo (obtido por&quot;</span>,
+                   <span class="st">&quot;validação cruzada)&quot;</span>),
+               <span class="dt">justify =</span> <span class="kw">c</span>(<span class="st">&quot;left&quot;</span>, <span class="kw">rep</span>(<span class="st">&quot;center&quot;</span>, <span class="dv">6</span>)),
+               <span class="dt">digits =</span> <span class="dv">4</span>,
+               <span class="dt">style =</span> <span class="st">&quot;rmarkdown&quot;</span>)</code></pre></div>
+<table style="width:107%;">
+<caption>Comparação dos métodos via resumos da matriz de confusão da classificação vs. teste, utilizando o ponto de corte ótimo (obtido por validação cruzada)</caption>
+<colgroup>
+<col width="31%" />
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left"> </th>
+<th align="center">GLM</th>
+<th align="center">LM</th>
+<th align="center">NB</th>
+<th align="center">LDA</th>
+<th align="center">QDA</th>
+<th align="center">KNN</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><strong>Prop. de Acertos</strong></td>
+<td align="center">0.7439</td>
+<td align="center">0.7439</td>
+<td align="center">0.7439</td>
+<td align="center">0.7652</td>
+<td align="center">0.7318</td>
+<td align="center">0.7712</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Sensibilidade</strong></td>
+<td align="center">0.5686</td>
+<td align="center">0.5686</td>
+<td align="center">0.5686</td>
+<td align="center">0.4608</td>
+<td align="center">0.5882</td>
+<td align="center">0.2941</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Especificidade</strong></td>
+<td align="center">0.8224</td>
+<td align="center">0.8224</td>
+<td align="center">0.8224</td>
+<td align="center">0.9013</td>
+<td align="center">0.7961</td>
+<td align="center">0.9846</td>
+</tr>
+</tbody>
+</table>
+<p>Note que embora na validação cruzada o método KNN tenha sido o de pior desempenho, quando ajustado a todo conjunto de treinamento e utilizado para classificação do conjunto de teste essa abordagem obteve os melhores resultados. Todavia cabe salientar que o método KNN é o menos parcimonioso de todos os avaliados, pois sua especificidade é muito alta em contraste com sua sensibilidade que é muito baixa, em comparação com os demais. Outro fato interessante dessa análise é que os classificadores baseados no modelo Logístico, Linear e Naive Bayes resultaram nas mesmas classificações e, além disso os demais resultados, com excessão do KNN, também foram bastante similares, isso sugere que a cojunto de dados analisado apresenta um comportamento das covariáveis com dentro das categorias bastante característico, o que leva os classificadores a predizer da mesma forma.</p>
+</div>
+</div>
+<div id="material-suplementar" class="section level2">
+<h2>Material suplementar</h2>
+<p>Todos os códigos (para manipulação, ajustes e gráficos) exibidos neste trabalho estão disponíveis no endereço <a href="https://jreduardo.github.io/est171-ml/" class="uri">https://jreduardo.github.io/est171-ml/</a>.</p>
+<!--------------------------------------------- -->
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><em>Paper:</em> <a href="http://www.cs.umd.edu/~mount/Papers/soda93-ann.pdf" class="uri">http://www.cs.umd.edu/~mount/Papers/soda93-ann.pdf</a><br />
+Page: <a href="https://www.cs.umd.edu/~mount/ANN/" class="uri">https://www.cs.umd.edu/~mount/ANN/</a>.<a href="#fnref1">↩</a></p></li>
+</ol>
+</div>
+
+<br>
+<hr>
+<center>© Copyright 2016 Ribeiro Jr., E. E.</center>
+<br>
+
+<div id="disqus_thread"></div>
+  <script type="text/javascript">
+    var disqus_shortname = 'eerj-website';
+    (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
