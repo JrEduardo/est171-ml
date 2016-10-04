@@ -18,7 +18,7 @@ output:
 source("../_setup.R")
 opts_chunk$set(
     cache = FALSE,
-    echo = FALSE,
+    echo = TRUE,
     fig.pos = "H")
 cols <- trellis.par.get("superpose.line")$col
 

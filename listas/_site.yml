@@ -5,7 +5,7 @@ output:
   html_document:
     theme: yeti
     highlight: pygments
-    css: ../_style.css
+    css: _style.css
     includes:
       after_body: _include-footer.html
 navbar:
