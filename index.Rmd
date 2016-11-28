@@ -23,15 +23,41 @@ divididas em listas de exercício, cujo soluções são armazenadas em
 armazenados em [`seminars/`]; e um trabalho prático elaborado com um
 resumo expandido e apresentado em formato de pôster, os arquivos
 referentes ao trabalho prático são armazenados no diretório
-[`practical/`]. A lista de materiais elaborados é exibida abaixo:
+[`poster/`]. A lista de materiais elaborados é exibida abaixo:
 
-* **Lista 1** ([PDF](./lista1.pdf) / [HTML](./lista1.html) com códigos) -
-  Machine Learning em problemas de Regressão: aplicação de regressão sob
-  penalização Lasso e KNN.\
-* **Lista 2** ([PDF](./lista2.pdf) / [HTML](./lista2.html) com códigos) -
-  Machine Learning em problemas de Classificação: aplicação das
-  abordagens via regressão logística, gaussiana, naive bayes,
-  discriminante linear, discriminante quadrático e KNN.\
+***
+
+* **Poster** ([PDF](./poster/lda-kdd-poster.pdf) /
+  [RCode](./poster/lda-kdd-poster.R)) - Modelos de Alocação Latente de
+  Dirichlet para Verificação dos Tópicos de Apresentação do
+  SIGKDD 2016. Aplicação do modelo LDA e proposta metodológica para
+  escolha do número de tópicos.
+
+***
+
+* **Seminar** ([PDF](./seminar/slides.pdf)) - Apresentação do artigo
+  _Ranking Universities Based on Career Outcomes of Graduates_ publicado
+  pela 22nd SIGKDD Conference, ACM.
+
+***
+
+* **Lista 1** ([PDF](./listas/lista1.pdf) /
+  [RCode](./listas/lista1.R)) - Machine Learning em problemas de
+  Regressão. Aplicação de regressão com preditores baseados em expansões
+  de séries de Fourier sob penalização Lasso e KNN.\
+* **Lista 2** ([PDF](./listas/lista2.pdf) /
+  [RCode](./listas/lista2.R)) - Machine Learning em problemas de
+  Classificação: aplicação das abordagens via regressão logística,
+  gaussiana, naive bayes, discriminante linear, discriminante quadrático
+  e KNN.\
+* **Lista 4** ([PDF](./listas/lista4.pdf) /
+  [RCode](./listas/lista4.R)) - Machine Learning para análise de
+  textos com redução de dimensionalidade, clusterização e regras de
+  associação. Aplicação de regras de associação
+  em dados categóricos. Treinamento de sistemas de recomendação baseados
+  em itens e baseados em usuários para dados de filmes.
+
+***
 
 Para sugestões, críticas ou relato de problemas abra uma _issue_ em
 [htps://github.com/JrEduardo/est171-ml/issues](https://github.com/JrEduardo/est171-ml/issues)
@@ -50,6 +76,6 @@ Este material é distribuído sob a licença
 [solutions]: http://blog.princehonest.com/stat-learning/
 [`listas/`]: https://github.com/JrEduardo/est171-ml/tree/master/listas
 [`seminars/`]: https://github.com/JrEduardo/est171-ml/tree/master/seminars
-[`practical/`]: https://github.com/JrEduardo/est171-ml/tree/master/practical
+[`poster/`]: https://github.com/JrEduardo/est171-ml/tree/master/poster
 [GNU General Public License, versão 3]: https://www.gnu.org/licenses/gpl-3.0.html
 [`LICENSE.md`]: https://github.com/JrEduardo/ce227-bayes/blob/master/LICENSE.md

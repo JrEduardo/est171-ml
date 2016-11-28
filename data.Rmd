@@ -1,0 +1,22 @@
+---
+title: "Conjuntos de dados"
+subtitle: "Disciplina EST171 da pós-graduação em Estatística UFMG"
+output: html_document
+---
+
+Conjuntos de dados utilizados nas atividades da disciplina.
+
+```{r, results="asis", echo=FALSE}
+
+dirs <- c("listas", "seminar", "poster")
+path <- unlist(lapply(dirs, function(x) {
+    dd <- dir(paste0(x, "/data"), recursive = TRUE)
+    paste0("./", x, "/data/", dd)
+}))
+data <- gsub(".*/(.*)", "\\1", path)
+index <- nchar(data) > 0
+
+cat(paste0(" * [", data[index], "](", path[index], ")"),
+    sep = "\n")
+
+```

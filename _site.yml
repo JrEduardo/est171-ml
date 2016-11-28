@@ -15,9 +15,17 @@ navbar:
     - text: Listas
       menu:
       - text: "Lista 1"
-        href: lista1.html
+        href: listas/lista1.pdf
+      - text: "Lista 2"
+        href: listas/lista2.pdf
+      - text: "Lista 4"
+        href: listas/lista4.pdf
     - text: Seminário
+      href: seminar/slides.pdf
     - text: Pôster
+      href: poster/lda-kdd-poster.pdf
+    - text: Data
+      href: data.html
   right:
     - text: Eduardo Jr's website
       href: https://jreduardo.github.io/
